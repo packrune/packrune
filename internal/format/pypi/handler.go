@@ -31,11 +31,13 @@ import (
 )
 
 type Handler struct {
-	logger  *slog.Logger
-	repoID  string
-	backend storage.Backend
-	cas     *cas.CAS
-	store   *repo.Store
+	logger   *slog.Logger
+	repoID   string
+	repoKind string
+	proxy    ProxyConfig
+	backend  storage.Backend
+	cas      *cas.CAS
+	store    *repo.Store
 }
 
 type HandlerConfig struct {
@@ -48,11 +50,13 @@ type HandlerConfig struct {
 
 func NewHandler(cfg HandlerConfig) *Handler {
 	return &Handler{
-		logger:  cfg.Logger,
-		repoID:  cfg.Repo.ID,
-		backend: cfg.Backend,
-		cas:     cfg.CAS,
-		store:   cfg.Store,
+		logger:   cfg.Logger,
+		repoID:   cfg.Repo.ID,
+		repoKind: string(cfg.Repo.Kind),
+		proxy:    ParseProxyConfig(cfg.Repo.Config),
+		backend:  cfg.Backend,
+		cas:      cfg.CAS,
+		store:    cfg.Store,
 	}
 }
 
@@ -113,12 +117,20 @@ func (h *Handler) handleIndex(w http.ResponseWriter, r *http.Request) {
 // handlePackage: PEP 503 listing of one package's files.
 func (h *Handler) handlePackage(w http.ResponseWriter, r *http.Request, name string) {
 	norm := normalize(name)
-	arts, err := h.store.ListArtifactsByPrefix(r.Context(), h.repoID, "packages/"+norm+"/")
+	arts, err := h.store.ResolveArtifactsByPrefix(r.Context(), h.repoID, "packages/"+norm+"/")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if len(arts) == 0 {
+		if h.repoKind == "proxy" {
+			html, perr := h.proxyFetchSimple(r.Context(), norm)
+			if perr == nil {
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				_, _ = w.Write([]byte(html))
+				return
+			}
+		}
 		http.NotFound(w, r)
 		return
 	}
@@ -166,6 +178,20 @@ func (h *Handler) handleDownload(w http.ResponseWriter, r *http.Request, pkg, fi
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Proxy mode: bytes may not be cached yet (size=0 stub). Pull them now.
+	if h.repoKind == "proxy" && art.Size == 0 {
+		body, perr := h.proxyFetchFile(r.Context(), pkg, filename)
+		if perr == nil {
+			w.Header().Set("Content-Type", "application/octet-stream")
+			w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+			if r.Method != http.MethodHead {
+				_, _ = w.Write(body)
+			}
+			return
+		}
+	}
+
 	rc, st, err := h.cas.Get(r.Context(), art.Digest)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
