@@ -145,7 +145,50 @@ Full instructions in [`deploy/README.md`](deploy/README.md).
 ```bash
 git clone https://github.com/packrune/packrune.git
 cd packrune
+```
 
+Prerequisites: **Go 1.25+**, **Node 20+**, **pnpm 9+**, **GNU make**,
+**git**. On macOS: `brew install go node pnpm`.
+
+There are two paths from here. Pick one.
+
+### Path A — `ptcli` (recommended for new contributors)
+
+The repo ships [`./ptcli`](#the-ptcli-operator), a coloured interactive
+menu that wraps every build / run / docker / admin / housekeeping
+command. From a fresh clone:
+
+```bash
+./ptcli 2        # first-time setup: pnpm install, web build, go build,
+                 # then prompts you for the initial admin credentials
+./ptcli 7        # full run: builds anything stale, prints the URL panel,
+                 # starts the server. Ctrl+C to stop.
+```
+
+Other useful entries from the menu (`./ptcli` with no args opens it):
+
+| #   | What                                                       |
+| --- | ---------------------------------------------------------- |
+| 1   | Doctor — runs `packrune doctor` against your config        |
+| 3   | Build all (frontend + backend)                             |
+| 8   | Backend only (`./bin/packrune`)                            |
+| 9   | Frontend dev server (`pnpm dev` on `:5173`, proxies API)   |
+| 10  | Backend in background + frontend dev in foreground         |
+| 12  | Run the Go test suite with `-race`                         |
+| 19  | Add a user                                                 |
+| 21  | Reset a user's password                                    |
+| 24  | GC orphan CAS blobs                                        |
+| 26  | All endpoints + CLI cheatsheet                             |
+
+Every menu item also accepts a name alias for scripting:
+`./ptcli doctor`, `./ptcli build-all`, `./ptcli passwd`,
+`./ptcli docker-up`, `./ptcli backup`.
+
+### Path B — `make` (no ptcli, just commands)
+
+If you'd rather see exactly what's running:
+
+```bash
 # Backend dependencies — Go 1.25+, GNU make.
 make build
 
