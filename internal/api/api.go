@@ -20,13 +20,15 @@ import (
 
 	"github.com/packrune/packrune/internal/auth"
 	"github.com/packrune/packrune/internal/repo"
+	"github.com/packrune/packrune/internal/webhook"
 )
 
 // API bundles the JSON API dependencies and constructs the chi sub-router.
 type API struct {
-	Logger *slog.Logger
-	Auth   *auth.DBService
-	Store  *repo.Store
+	Logger   *slog.Logger
+	Auth     *auth.DBService
+	Store    *repo.Store
+	Webhooks *webhook.Service
 
 	Version string
 	Commit  string
@@ -48,6 +50,11 @@ func (a *API) Router() chi.Router {
 		r.Get("/repositories/{name}/{format}", a.handleGetRepository)
 		r.Get("/formats", a.handleListFormats)
 		r.Get("/system/stats", a.handleSystemStats)
+
+		// Admin-only (the handler checks IsAdmin and returns 403 otherwise).
+		r.Get("/webhooks", a.handleListWebhooks)
+		r.Post("/webhooks", a.handleCreateWebhook)
+		r.Delete("/webhooks/{id}", a.handleDeleteWebhook)
 	})
 
 	return r

@@ -187,19 +187,25 @@ without page reload. Real authenticated pages land in Faz 7.
 The pages users actually see. Each item ships a polished, animated, themed,
 internationalized page.
 
-- [ ] Login + onboarding wizard
-- [ ] Dashboard (bento layout, recent activity, storage doluluk)
-- [ ] Repositories list (grid + list toggle, filter chips)
+- [x] Login page (glass card, motion entrance, real /api/auth/login wire-up)
+- [x] Dashboard (bento layout, stat cards, repository preview, "you" card,
+      per-format chip strip, live /api/system/stats refresh)
+- [x] Repositories list (bento grid, format-colored badges)
+- [ ] Onboarding wizard for the first user (deferred — `packrune users add` covers it)
 - [ ] Repository detail (package browser + tabs)
 - [ ] Package detail (versions, deps, README render, stats)
 - [ ] Global search + Cmd+K command palette
-- [ ] Users & teams
-- [ ] Tokens management
+- [ ] Users & teams page
+- [ ] Tokens management page
 - [ ] System settings (storage, auth, SMTP, replication)
 - [ ] Audit log timeline
 - [ ] Profile (theme, language, 2FA)
 - [ ] Accessibility audit (WCAG 2.1 AA target)
 - [ ] Responsive breakpoint pass (≥768px first-class; mobile read-only)
+
+**Faz 7 partial.** The auth → dashboard → repositories path is wired
+end-to-end against the live JSON API; deeper detail pages and admin
+screens land next.
 
 ## Faz 8 — Proxy + group repos
 
@@ -236,19 +242,28 @@ internationalized page.
 
 ## Faz 11 — Replication, webhooks, SSO
 
-- [ ] Active-passive replication
-- [ ] Active-active replication (conflict resolution rules)
-- [ ] Webhook delivery (with retry + signing)
-- [ ] SAML SSO
-- [ ] LDAP integration
-- [ ] Audit log retention + export
+- [x] Webhook delivery with HMAC-SHA256 signing (X-Packrune-Signature)
+- [x] Webhook admin API (GET/POST/DELETE /api/webhooks, admin-only)
+- [x] webhook_deliveries table with status/attempts/last_error columns
+      ready for the retry worker
+- [ ] Webhook outbox worker with exponential backoff retry (deferred)
+- [ ] Wire dispatcher into format handlers' OnUpload/OnDelete hooks (deferred)
+- [ ] Active-passive replication (deferred)
+- [ ] Active-active replication (deferred)
+- [ ] SAML SSO (deferred)
+- [ ] LDAP integration (deferred)
+- [ ] Audit log retention + export (deferred)
 
 ## Faz 12 — Deployment & dogfood
 
-- [ ] Multi-arch Docker image (amd64, arm64)
-- [ ] Helm chart (and we serve it from our own Helm format — dogfood)
-- [ ] Docker compose example
-- [ ] Systemd unit file example
-- [ ] Backup + restore CLI commands
-- [ ] Release automation (goreleaser)
-- [ ] Project website (separate repo, statically hosted)
+- [x] Dockerfile (multi-stage: node → golang-alpine → distroless static)
+- [x] Helm chart at `deploy/helm/packrune` with values.yaml + templates
+- [x] docker-compose.yml example with packrune-data volume + commented
+      postgres/minio HA blocks
+- [x] systemd unit file at `deploy/systemd/packrune.service` with hardening
+- [x] deploy/README.md walking through Docker, Helm, and systemd paths
+- [ ] Backup + restore CLI commands (deferred)
+- [ ] Multi-arch image build in CI (goreleaser or buildx) (deferred)
+- [ ] Project website / docs site (deferred)
+- [ ] Dogfood: publish our own Helm chart through our own Helm format
+      (post-release)

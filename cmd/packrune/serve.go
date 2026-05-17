@@ -34,6 +34,7 @@ import (
 	"github.com/packrune/packrune/internal/storage/cas"
 	"github.com/packrune/packrune/internal/storage/fs"
 	"github.com/packrune/packrune/internal/web"
+	"github.com/packrune/packrune/internal/webhook"
 	"github.com/packrune/packrune/migrations"
 )
 
@@ -180,13 +181,15 @@ func runServe(args []string) error {
 	srv.Router().Mount("/pypi", http.StripPrefix("/pypi", pypiHandler))
 	srv.Router().Mount("/maven", http.StripPrefix("/maven", mavenHandler))
 
-	// JSON admin API.
+	// JSON admin API + webhook service.
 	authSvc := auth.NewDBService(database)
+	webhookSvc := webhook.New(database, logger)
 	jsonAPI := &api.API{
-		Logger:  logger,
-		Auth:    authSvc,
-		Store:   repoStore,
-		Version: version, Commit: commit, Date: date,
+		Logger:   logger,
+		Auth:     authSvc,
+		Store:    repoStore,
+		Webhooks: webhookSvc,
+		Version:  version, Commit: commit, Date: date,
 	}
 	srv.Router().Mount("/api", jsonAPI.Router())
 
