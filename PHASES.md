@@ -113,24 +113,31 @@ is insecure (or TLS lands in Faz 12).
 The skeleton + design system. Pages come in Faz 7. This phase is "you can log
 in and see an empty shell that already looks better than Nexus."
 
-- [ ] `web/` scaffold: Vite + React 19 + TypeScript
-- [ ] Tailwind CSS v4 setup
-- [ ] Biome (lint + format) config
-- [ ] Vitest setup
-- [ ] Design tokens (colors, spacing, typography, glass opacity, gradients)
-- [ ] Theme system: CSS variables + runtime switch
-- [ ] Built-in themes: Aurora, Midnight, Daybreak, Terminal, Mono
-- [ ] i18n setup (i18next + react-i18next), `en` + `tr` baseline
-- [ ] RTL-ready layout primitives
-- [ ] Glass surface primitive component (`<Glass>`)
-- [ ] Aurora gradient background component (animated, low-CPU)
-- [ ] Motion primitives (page transition, hover, tap)
-- [ ] TanStack Router setup, layout shell
-- [ ] TanStack Query setup, API client
-- [ ] Auth flow: login screen, token storage, session refresh
-- [ ] Layout shell: sidebar, topbar, command palette (Cmd+K) trigger
-- [ ] Empty-state component (used everywhere)
-- [ ] Go `embed.FS` integration: build embeds `web/dist` into the binary
+- [x] `web/` scaffold: Vite 6 + React 19 + TypeScript 5.6
+- [x] Tailwind CSS v4 setup (via `@tailwindcss/vite`)
+- [x] Biome (lint + format) config
+- [ ] Vitest setup (deferred — added when first frontend test lands)
+- [x] Design tokens (colors, spacing, typography, glass opacity, gradients) in `global.css`
+- [x] Theme system: CSS variables + runtime `data-theme` switch + localStorage persist
+- [x] Built-in themes: Aurora, Midnight, Daybreak, Terminal, Mono
+- [x] i18n setup (i18next + react-i18next), `en` + `tr` baseline
+- [ ] RTL-ready layout primitives (Tailwind v4 supports `dir-` natively; revisit when first RTL string lands)
+- [x] Glass surface primitive component (`<Glass>`, 3 elevations)
+- [x] Aurora gradient background component (CSS-keyframe animated, theme-driven colors)
+- [x] Motion primitives (Landing uses `motion/react` for entrance + stagger)
+- [ ] TanStack Router setup (deferred — added with real routes in Faz 7)
+- [x] TanStack Query setup (`QueryClient` in App, ready for hooks)
+- [x] API client (`lib/api.ts` — fetchJSON + ApiError + typed getVersion)
+- [ ] Auth flow: login screen, token storage, session refresh (Faz 7)
+- [x] Layout shell: sidebar, topbar, theme + language switchers (`Shell.tsx`)
+- [x] Landing page that exercises every primitive (glass, aurora, motion, theme, i18n)
+- [x] Go `embed.FS` integration: `internal/web` mounted at `/*`, SPA fallback to index.html, API/registry paths protected from fallback
+- [x] Placeholder `dist/index.html` so the binary is self-contained even before `pnpm build`
+
+**Faz 3 done.** The binary now ships a beautiful glass + aurora landing page
+(once `make web-build` runs once) at `/`, while `/v2/` and `/api/` continue
+to serve their respective backends. Theme and language switching work live
+without page reload. Real authenticated pages land in Faz 7.
 
 ## Faz 4 — npm format
 

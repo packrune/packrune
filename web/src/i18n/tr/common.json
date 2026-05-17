@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "Packrune",
+    "tagline": "Tamamen ücretsiz, tamamen self-hosted, evrensel artifact repository yöneticisi."
+  },
+  "nav": {
+    "dashboard": "Gösterge Paneli",
+    "repositories": "Depolar",
+    "packages": "Paketler",
+    "users": "Kullanıcılar",
+    "tokens": "Anahtarlar",
+    "settings": "Ayarlar",
+    "audit": "Denetim Kaydı"
+  },
+  "actions": {
+    "search": "Ara",
+    "newRepository": "Yeni depo",
+    "signIn": "Giriş yap",
+    "signOut": "Çıkış yap"
+  },
+  "landing": {
+    "headline": "Tek binary. Tüm formatlar. Sonsuza dek ücretsiz.",
+    "subhead": "Docker, npm, Helm, Go, PyPI, Maven — hepsi tek self-hosted serviste. Lisans anahtarı sormaz, asla.",
+    "ctaPrimary": "Giriş yap",
+    "ctaSecondary": "Yol haritasını gör",
+    "featureFreeTitle": "Sonsuza dek ücretsiz",
+    "featureFreeBody": "AGPL-3.0 + Commons Clause lisansı. Hiç kimse — biz dahil — Packrune'a fiyat etiketi koyamaz.",
+    "featureFastTitle": "Hızlı ve hafif",
+    "featureFastBody": "Tek bir Go binary. Pure-Go SQLite sayesinde CGO yok, JVM yok, sürpriz yok.",
+    "featureUnifiedTitle": "Her format",
+    "featureUnifiedBody": "Docker, npm, Helm, Go, PyPI, Maven ilk günden. Tek bir Format arabirimi, plugin karmaşası yok."
+  },
+  "theme": {
+    "label": "Tema",
+    "aurora": "Aurora",
+    "midnight": "Gece Yarısı",
+    "daybreak": "Şafak",
+    "terminal": "Terminal",
+    "mono": "Mono"
+  },
+  "language": {
+    "label": "Dil"
+  }
+}

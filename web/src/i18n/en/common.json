@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "Packrune",
+    "tagline": "The fully free, fully self-hosted, universal artifact repository manager."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "repositories": "Repositories",
+    "packages": "Packages",
+    "users": "Users",
+    "tokens": "Tokens",
+    "settings": "Settings",
+    "audit": "Audit Log"
+  },
+  "actions": {
+    "search": "Search",
+    "newRepository": "New repository",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
+  },
+  "landing": {
+    "headline": "One binary. Every format. Forever free.",
+    "subhead": "Docker, npm, Helm, Go, PyPI, Maven — all in a single self-hosted service that never asks for a license key.",
+    "ctaPrimary": "Sign in",
+    "ctaSecondary": "View the roadmap",
+    "featureFreeTitle": "Free forever",
+    "featureFreeBody": "Licensed under AGPL-3.0 + Commons Clause. Nobody — not even us — can ever put a price tag on Packrune.",
+    "featureFastTitle": "Fast and small",
+    "featureFastBody": "A single Go binary. Pure-Go SQLite means no CGO, no JVM, no surprises.",
+    "featureUnifiedTitle": "Every format",
+    "featureUnifiedBody": "Docker, npm, Helm, Go, PyPI, Maven on day one. One Format interface, no plugin sprawl."
+  },
+  "theme": {
+    "label": "Theme",
+    "aurora": "Aurora",
+    "midnight": "Midnight",
+    "daybreak": "Daybreak",
+    "terminal": "Terminal",
+    "mono": "Mono"
+  },
+  "language": {
+    "label": "Language"
+  }
+}

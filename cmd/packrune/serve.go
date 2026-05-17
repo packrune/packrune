@@ -25,6 +25,7 @@ import (
 	"github.com/packrune/packrune/internal/storage"
 	"github.com/packrune/packrune/internal/storage/cas"
 	"github.com/packrune/packrune/internal/storage/fs"
+	"github.com/packrune/packrune/internal/web"
 	"github.com/packrune/packrune/migrations"
 )
 
@@ -94,6 +95,15 @@ func runServe(args []string) error {
 	}
 	// Docker registry V2 surface.
 	srv.Router().Mount("/v2", dockerHandler)
+
+	// Embedded admin UI. Served from "/" so the SPA fallback works for any
+	// client-side route. API and /v2/ are mounted ahead of this so they win.
+	uiHandler, err := web.Handler()
+	if err != nil {
+		_ = database.Close()
+		return fmt.Errorf("web: %w", err)
+	}
+	srv.Router().Handle("/*", uiHandler)
 
 	logger.Info("starting packrune", "addr", cfg.Server.Addr)
 	if err := srv.Run(ctx); err != nil {

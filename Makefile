@@ -87,4 +87,7 @@ web-build: ## Build the frontend for embedding into the binary.
 
 .PHONY: clean
 clean: ## Remove build artifacts.
-	rm -rf $(BIN_DIR) coverage.out coverage.html $(WEB_DIR)/dist
+	rm -rf $(BIN_DIR) coverage.out coverage.html internal/web/dist
+	mkdir -p internal/web/dist
+	@echo "Note: internal/web/dist/ has been reset; placeholder index.html is gone."
+	@echo "Run 'make web-build' to repopulate, or restore the placeholder."
