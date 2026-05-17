@@ -16,14 +16,17 @@ import (
 	"github.com/packrune/packrune/internal/storage/cas"
 )
 
-// Handler serves the /v2/ surface for one Packrune docker repository. Multiple
-// docker repos are supported via separate Handler instances mounted on
-// distinct path prefixes (faz 2 polish — today there is a single default
-// repo).
+// Handler serves the /v2/ surface for one Packrune docker repository.
+//
+// Behavior depends on Repo.Kind:
+//   - hosted: serve only what was pushed; 404 on unknown blobs.
+//   - proxy : on miss, fetch from configured upstream and cache locally.
 type Handler struct {
 	logger   *slog.Logger
 	repoID   string
 	repoName string
+	repoKind string
+	proxy    ProxyConfig
 	backend  storage.Backend
 	cas      *cas.CAS
 	store    *repo.Store
@@ -32,12 +35,12 @@ type Handler struct {
 
 // HandlerConfig is the dependency bundle passed to NewHandler.
 type HandlerConfig struct {
-	Logger      *slog.Logger
-	Repo        repo.Repository
-	Backend     storage.Backend
-	CAS         *cas.CAS
-	Store       *repo.Store
-	UploadRoot  string // directory used to stage in-progress uploads
+	Logger     *slog.Logger
+	Repo       repo.Repository
+	Backend    storage.Backend
+	CAS        *cas.CAS
+	Store      *repo.Store
+	UploadRoot string // directory used to stage in-progress uploads
 }
 
 // NewHandler constructs a Handler bound to one Packrune docker repository.
@@ -46,6 +49,8 @@ func NewHandler(cfg HandlerConfig) *Handler {
 		logger:   cfg.Logger,
 		repoID:   cfg.Repo.ID,
 		repoName: cfg.Repo.Name,
+		repoKind: string(cfg.Repo.Kind),
+		proxy:    ParseProxyConfig(cfg.Repo.Config),
 		backend:  cfg.Backend,
 		cas:      cfg.CAS,
 		store:    cfg.Store,

@@ -41,6 +41,15 @@ func (h *Handler) handleBlob(w http.ResponseWriter, r *http.Request, name, diges
 		st, err := h.cas.Stat(r.Context(), digest)
 		if err != nil {
 			if errors.Is(err, storage.ErrNotFound) {
+				if h.repoKind == "proxy" {
+					if size, mt, ferr := h.proxyFetchBlob(r.Context(), name, digest); ferr == nil {
+						w.Header().Set("Content-Length", strconv.FormatInt(size, 10))
+						w.Header().Set("Content-Type", mt)
+						w.Header().Set("Docker-Content-Digest", digest)
+						w.WriteHeader(http.StatusOK)
+						return
+					}
+				}
 				writeError(w, http.StatusNotFound, errCodeBlobUnknown, "blob not found")
 				return
 			}
@@ -54,6 +63,13 @@ func (h *Handler) handleBlob(w http.ResponseWriter, r *http.Request, name, diges
 
 	case http.MethodGet:
 		rc, st, err := h.cas.Get(r.Context(), digest)
+		if err != nil {
+			if errors.Is(err, storage.ErrNotFound) && h.repoKind == "proxy" {
+				if _, _, ferr := h.proxyFetchBlob(r.Context(), name, digest); ferr == nil {
+					rc, st, err = h.cas.Get(r.Context(), digest)
+				}
+			}
+		}
 		if err != nil {
 			if errors.Is(err, storage.ErrNotFound) {
 				writeError(w, http.StatusNotFound, errCodeBlobUnknown, "blob not found")

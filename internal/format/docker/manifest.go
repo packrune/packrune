@@ -52,6 +52,14 @@ func (h *Handler) serveManifest(w http.ResponseWriter, r *http.Request, name, re
 	path := manifestPath(name, reference)
 	art, err := h.store.GetArtifact(r.Context(), h.repoID, path)
 	if err != nil {
+		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
+			// Fetch + cache from upstream, then re-lookup.
+			if _, _, _, ferr := h.proxyFetchManifest(r.Context(), name, reference); ferr == nil {
+				art, err = h.store.GetArtifact(r.Context(), h.repoID, path)
+			}
+		}
+	}
+	if err != nil {
 		if errors.Is(err, repo.ErrNotFound) {
 			writeError(w, http.StatusNotFound, errCodeManifestUnknown, "manifest not found")
 			return

@@ -29,13 +29,15 @@ import (
 // dirs so tests can hit it with httptest.
 func newHandler(t *testing.T) http.Handler {
 	t.Helper()
+	return newHandlerWithRepo(t, "docker", repo.KindHosted, nil)
+}
+
+func newHandlerWithRepo(t *testing.T, name string, kind repo.Kind, config []byte) http.Handler {
+	t.Helper()
 	ctx := context.Background()
 	tmp := t.TempDir()
 
-	database, err := db.Open(ctx, config.DatabaseConfig{
-		Driver: "sqlite", DSN: filepath.Join(tmp, "test.db"),
-		MaxOpenConns: 1, MaxIdleConns: 1,
-	})
+	database, err := db.Open(ctx, dockerTestDBConfig(tmp))
 	if err != nil {
 		t.Fatalf("db open: %v", err)
 	}
@@ -50,7 +52,7 @@ func newHandler(t *testing.T) http.Handler {
 	}
 
 	store := repo.NewStore(database)
-	r, err := store.Ensure(ctx, "docker", "docker", repo.KindHosted, nil)
+	r, err := store.Ensure(ctx, name, "docker", kind, config)
 	if err != nil {
 		t.Fatalf("ensure repo: %v", err)
 	}
@@ -63,12 +65,17 @@ func newHandler(t *testing.T) http.Handler {
 		UploadRoot: filepath.Join(tmp, "uploads"),
 	})
 
-	// Wrap so tests can exercise the same URL space as production (which
-	// mounts the handler under /v2). httptest doesn't strip prefixes for us.
 	mux := http.NewServeMux()
 	mux.Handle("/v2/", h)
 	mux.Handle("/v2", h)
 	return mux
+}
+
+func dockerTestDBConfig(tmp string) config.DatabaseConfig {
+	return config.DatabaseConfig{
+		Driver: "sqlite", DSN: filepath.Join(tmp, "test.db"),
+		MaxOpenConns: 1, MaxIdleConns: 1,
+	}
 }
 
 func TestDocker_RegistryHandshake(t *testing.T) {
@@ -138,6 +145,71 @@ func TestDocker_BlobPushPullRoundTrip(t *testing.T) {
 	got, _ := io.ReadAll(resp.Body)
 	if !bytes.Equal(got, payload) {
 		t.Errorf("payload mismatch")
+	}
+}
+
+func TestDocker_ProxyFallthroughOnMiss(t *testing.T) {
+	manifest := []byte(`{"schemaVersion":2,"mediaType":"application/vnd.oci.image.manifest.v1+json","layers":[]}`)
+	blob := []byte("upstream blob")
+	blobSum := sha256.Sum256(blob)
+	blobDigest := "sha256:" + hex.EncodeToString(blobSum[:])
+	manifestSum := sha256.Sum256(manifest)
+	manifestDigest := "sha256:" + hex.EncodeToString(manifestSum[:])
+
+	// Fake "Docker Hub" upstream.
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v2/library/test/manifests/latest":
+			w.Header().Set("Content-Type", "application/vnd.oci.image.manifest.v1+json")
+			w.Header().Set("Docker-Content-Digest", manifestDigest)
+			_, _ = w.Write(manifest)
+		case r.URL.Path == "/v2/library/test/blobs/"+blobDigest:
+			w.Header().Set("Content-Type", "application/octet-stream")
+			_, _ = w.Write(blob)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer upstream.Close()
+
+	cfg, _ := json.Marshal(map[string]string{"upstream": upstream.URL})
+	ts := httptest.NewServer(newHandlerWithRepo(t, "dockerhub-proxy", repo.KindProxy, cfg))
+	defer ts.Close()
+
+	// Manifest GET should fall through to upstream, cache, and serve.
+	resp, err := http.Get(ts.URL + "/v2/library/test/manifests/latest")
+	if err != nil {
+		t.Fatalf("get manifest: %v", err)
+	}
+	if resp.StatusCode != 200 {
+		t.Fatalf("status = %d", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !bytes.Equal(body, manifest) {
+		t.Errorf("manifest bytes mismatch")
+	}
+	_ = resp.Body.Close()
+
+	// Second manifest GET should be served from cache (upstream still works
+	// either way, but verifying body identity is enough for now).
+	resp, err = http.Get(ts.URL + "/v2/library/test/manifests/latest")
+	if err != nil {
+		t.Fatalf("second get: %v", err)
+	}
+	body2, _ := io.ReadAll(resp.Body)
+	if !bytes.Equal(body, body2) {
+		t.Errorf("cached manifest mismatch")
+	}
+	_ = resp.Body.Close()
+
+	// Blob proxy GET.
+	resp, err = http.Get(ts.URL + "/v2/library/test/blobs/" + blobDigest)
+	if err != nil {
+		t.Fatalf("blob: %v", err)
+	}
+	got, _ := io.ReadAll(resp.Body)
+	if !bytes.Equal(got, blob) {
+		t.Errorf("blob bytes mismatch")
 	}
 }
 
