@@ -29,83 +29,83 @@ import (
 
 // Config holds the full runtime configuration for a Packrune process.
 type Config struct {
-	Server   ServerConfig   `yaml:"server"`
-	Database DatabaseConfig `yaml:"database"`
-	Storage  StorageConfig  `yaml:"storage"`
-	Auth     AuthConfig     `yaml:"auth"`
-	Log      LogConfig      `yaml:"log"`
+	Server   ServerConfig   `yaml:"server"   json:"server"`
+	Database DatabaseConfig `yaml:"database" json:"database"`
+	Storage  StorageConfig  `yaml:"storage"  json:"storage"`
+	Auth     AuthConfig     `yaml:"auth"     json:"auth"`
+	Log      LogConfig      `yaml:"log"      json:"log"`
 }
 
 // ServerConfig configures the HTTP server.
 type ServerConfig struct {
 	// Addr is the listen address, e.g. ":8080".
-	Addr string `yaml:"addr"`
+	Addr string `yaml:"addr" json:"addr"`
 	// ExternalURL is the externally-visible URL of this instance, used for
 	// redirects and Docker auth realm hints.
-	ExternalURL string `yaml:"external_url"`
+	ExternalURL string `yaml:"external_url" json:"external_url"`
 	// ReadTimeoutSeconds limits request read time. 0 disables.
-	ReadTimeoutSeconds int `yaml:"read_timeout"`
+	ReadTimeoutSeconds int `yaml:"read_timeout" json:"read_timeout"`
 	// WriteTimeoutSeconds limits response write time. 0 disables — blob
 	// uploads can legitimately take a long time and we never want to cut them.
-	WriteTimeoutSeconds int `yaml:"write_timeout"`
+	WriteTimeoutSeconds int `yaml:"write_timeout" json:"write_timeout"`
 }
 
 // DatabaseConfig configures the metadata store.
 type DatabaseConfig struct {
 	// Driver is "sqlite" or "postgres".
-	Driver string `yaml:"driver"`
+	Driver string `yaml:"driver" json:"driver"`
 	// DSN is the connection string. For sqlite this is a file path; for
 	// postgres a "postgres://user:pass@host:port/db?..." URL.
-	DSN string `yaml:"dsn"`
+	DSN string `yaml:"dsn" json:"dsn"`
 	// MaxOpenConns / MaxIdleConns are passed through to database/sql.
 	// Ignored for sqlite which is single-writer.
-	MaxOpenConns int `yaml:"max_open_conns"`
-	MaxIdleConns int `yaml:"max_idle_conns"`
+	MaxOpenConns int `yaml:"max_open_conns" json:"max_open_conns"`
+	MaxIdleConns int `yaml:"max_idle_conns" json:"max_idle_conns"`
 }
 
 // StorageConfig configures the blob storage backend.
 type StorageConfig struct {
 	// Backend selects a backend: "fs" or "s3".
-	Backend string   `yaml:"backend"`
-	FS      FSConfig `yaml:"fs"`
-	S3      S3Config `yaml:"s3"`
+	Backend string   `yaml:"backend" json:"backend"`
+	FS      FSConfig `yaml:"fs"      json:"fs"`
+	S3      S3Config `yaml:"s3"      json:"s3"`
 }
 
 // FSConfig configures the filesystem backend.
 type FSConfig struct {
 	// Root is the directory under which all blobs live.
-	Root string `yaml:"root"`
+	Root string `yaml:"root" json:"root"`
 }
 
 // S3Config configures the S3-compatible backend.
 type S3Config struct {
-	Endpoint  string `yaml:"endpoint"`
-	Bucket    string `yaml:"bucket"`
-	Region    string `yaml:"region"`
-	AccessKey string `yaml:"access_key"`
-	SecretKey string `yaml:"secret_key"`
+	Endpoint  string `yaml:"endpoint"   json:"endpoint"`
+	Bucket    string `yaml:"bucket"     json:"bucket"`
+	Region    string `yaml:"region"     json:"region"`
+	AccessKey string `yaml:"access_key" json:"access_key"`
+	SecretKey string `yaml:"secret_key" json:"secret_key"`
 	// UsePath toggles path-style addressing. MinIO requires this.
-	UsePath bool `yaml:"use_path"`
+	UsePath bool `yaml:"use_path" json:"use_path"`
 }
 
 // AuthConfig holds authentication settings.
 type AuthConfig struct {
 	// TokenSecret is the HMAC key used to sign session tokens. Must be at
 	// least 32 bytes; generated automatically at first startup if blank.
-	TokenSecret string `yaml:"token_secret"`
+	TokenSecret string `yaml:"token_secret" json:"token_secret"`
 	// SessionTTLHours is how long a login session lasts.
-	SessionTTLHours int `yaml:"session_ttl"`
+	SessionTTLHours int `yaml:"session_ttl" json:"session_ttl"`
 	// AllowSignup controls whether unauthenticated users can self-register.
 	// Defaults to false; admins create accounts.
-	AllowSignup bool `yaml:"allow_signup"`
+	AllowSignup bool `yaml:"allow_signup" json:"allow_signup"`
 }
 
 // LogConfig configures structured logging.
 type LogConfig struct {
 	// Level: "debug", "info", "warn", "error".
-	Level string `yaml:"level"`
+	Level string `yaml:"level" json:"level"`
 	// Format: "text" (human) or "json" (machine).
-	Format string `yaml:"format"`
+	Format string `yaml:"format" json:"format"`
 }
 
 // Defaults returns a Config populated with sensible defaults for a single-node

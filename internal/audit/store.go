@@ -60,7 +60,8 @@ func (r *Reader) List(ctx context.Context, before time.Time, limit int) ([]Recor
 	}
 	defer rows.Close()
 
-	var out []Record
+	// Always return a non-nil slice so JSON serializes as [] not null.
+	out := make([]Record, 0)
 	for rows.Next() {
 		var rec Record
 		var userID sql.NullString

@@ -74,7 +74,7 @@ export function AuditPage() {
             <p className="mt-1 text-sm text-[color:var(--fg-muted)]">{t("audit.subtitle")}</p>
           </div>
 
-          {records.data && records.data.items.length > 0 ? (
+          {records.data && records.data.items && records.data.items.length > 0 ? (
             <Glass elevation={2} className="overflow-hidden">
               <ul className="divide-y divide-[color:var(--border-glass)]">
                 {records.data.items.map((rec) => (

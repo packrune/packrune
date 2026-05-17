@@ -96,7 +96,8 @@ func (s *Service) Create(ctx context.Context, name, url, secret string, events [
 	}, nil
 }
 
-// List returns every webhook ordered by created_at.
+// List returns every webhook ordered by created_at. Never returns a nil
+// slice — empty result is [] not null in JSON.
 func (s *Service) List(ctx context.Context) ([]Webhook, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT id, name, url, secret, events, is_active, created_at
 		FROM webhooks ORDER BY created_at DESC`)
@@ -104,7 +105,7 @@ func (s *Service) List(ctx context.Context) ([]Webhook, error) {
 		return nil, fmt.Errorf("webhook: list: %w", err)
 	}
 	defer rows.Close()
-	var out []Webhook
+	out := make([]Webhook, 0)
 	for rows.Next() {
 		var w Webhook
 		var events string

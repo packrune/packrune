@@ -82,7 +82,7 @@ export function TokensPage() {
           )}
 
           <div className="mt-6">
-            {tokens.data && tokens.data.items.length > 0 ? (
+            {tokens.data && tokens.data.items && tokens.data.items.length > 0 ? (
               <ul className="flex flex-col gap-2">
                 {tokens.data.items.map((tk) => (
                   <li key={tk.id}>

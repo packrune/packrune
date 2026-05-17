@@ -94,7 +94,7 @@ export function WebhooksPage() {
           />
 
           <div className="mt-6">
-            {list.data && list.data.items.length > 0 ? (
+            {list.data && list.data.items && list.data.items.length > 0 ? (
               <ul className="flex flex-col gap-2">
                 {list.data.items.map((wh) => (
                   <li key={wh.id}>

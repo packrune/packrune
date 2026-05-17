@@ -104,7 +104,7 @@ export function UsersPage() {
           />
 
           <div className="mt-6">
-            {users.data && users.data.items.length > 0 ? (
+            {users.data && users.data.items && users.data.items.length > 0 ? (
               <Glass elevation={2} className="overflow-hidden">
                 <ul className="divide-y divide-[color:var(--border-glass)]">
                   {users.data.items.map((u) => (
