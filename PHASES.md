@@ -209,12 +209,18 @@ screens land next.
 
 ## Faz 8 — Proxy + group repos
 
-- [ ] Upstream registry client (per-format)
-- [ ] Cache eviction policy (LRU + age)
-- [ ] Cache invalidation hooks
-- [ ] Group repository resolver (first-match across members)
-- [ ] Per-format proxy support: Docker, npm, Helm, Go, PyPI, Maven
-- [ ] Proxy auth (upstream credentials, optional)
+- [x] Per-format proxy support: **Docker** (manifest + blob fall-through
+      with caching into CAS + per-image artifact rows)
+- [x] Repo.Config-driven upstream configuration (`{"upstream":"https://..."}`)
+- [x] Cache write-through: upstream digest verified against requested digest
+      before storing; mismatches are dropped
+- [x] Go-level integration test (fake upstream → proxy fetch → second-fetch
+      from cache → blob proxy)
+- [ ] Per-format proxy support: npm, Helm, Go, PyPI, Maven (deferred)
+- [ ] Cache eviction policy (LRU + age) — deferred
+- [ ] Cache invalidation hooks — deferred
+- [ ] Group repository resolver (first-match across members) — deferred
+- [ ] Proxy auth (upstream bearer/basic credentials) — deferred
 
 ## Faz 9 — PyPI format
 
