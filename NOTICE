@@ -1,0 +1,29 @@
+Packrune
+Copyright (C) 2026 Packrune Contributors
+
+This product includes software developed by the Packrune project
+and its contributors.
+
+Packrune is licensed under the GNU Affero General Public License
+version 3.0 ("AGPL-3.0") with the Commons Clause License Condition
+v1.0 applied on top.
+
+  - The AGPL-3.0 text is in the LICENSE file.
+  - The Commons Clause text is in the COMMONS-CLAUSE file.
+
+Together these mean, in plain language:
+
+  - You may run, study, modify, and self-host Packrune for free,
+    including inside a commercial organization for internal use.
+  - If you run a modified version as a network service, you must
+    publish the source of your modifications (AGPL §13).
+  - You may NOT sell Packrune, sell a hosted/managed service whose
+    value derives substantially from Packrune, or otherwise
+    commercialize the software itself.
+
+Every source file should carry an SPDX header:
+
+  // SPDX-License-Identifier: AGPL-3.0-only WITH Commons-Clause
+
+If you are reading this in a redistribution, the redistributor must
+preserve this NOTICE, the LICENSE file, and the COMMONS-CLAUSE file.

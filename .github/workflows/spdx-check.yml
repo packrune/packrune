@@ -1,0 +1,19 @@
+name: SPDX header check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  spdx:
+    name: Verify SPDX headers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run header check
+        run: ./scripts/check-headers.sh

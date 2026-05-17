@@ -1,0 +1,59 @@
+# Build artifacts
+/bin/
+/dist/
+/build/
+*.exe
+*.test
+*.out
+*.prof
+
+# Go
+/vendor/
+go.work
+go.work.sum
+coverage.txt
+coverage.html
+
+# Node / frontend
+/web/node_modules/
+/web/dist/
+/web/.vite/
+/web/.turbo/
+.npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Generated / embedded
+/web/build-info.json
+/internal/web/embed_gen.go
+
+# Local dev data
+/data/
+/storage/
+/tmp/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Tooling
+.direnv/
+.envrc
+
+# Test artifacts
+/testdata/tmp/
