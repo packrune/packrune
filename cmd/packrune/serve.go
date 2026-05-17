@@ -198,6 +198,9 @@ func runServe(args []string) error {
 	}
 	srv.Router().Mount("/api", jsonAPI.Router())
 
+	// Start the webhook retry worker (best-effort; backoff up to ~32 min).
+	webhookSvc.StartWorker(ctx)
+
 	// Embedded admin UI. Served from "/" so the SPA fallback works for any
 	// client-side route. API and /v2/ are mounted ahead of this so they win.
 	uiHandler, err := web.Handler()
