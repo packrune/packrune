@@ -191,21 +191,24 @@ internationalized page.
 - [x] Dashboard (bento layout, stat cards, repository preview, "you" card,
       per-format chip strip, live /api/system/stats refresh)
 - [x] Repositories list (bento grid, format-colored badges)
+- [x] Tokens management page (issue / copy-once / revoke)
+- [x] Users & teams page (admin: list/create/deactivate, crown badge,
+      self-deactivation guard)
+- [x] Audit log timeline (admin, color-icon results, 15s auto-refresh)
+- [x] Shell sign-out button + sidebar Link routes + active state
 - [ ] Onboarding wizard for the first user (deferred — `packrune users add` covers it)
 - [ ] Repository detail (package browser + tabs)
 - [ ] Package detail (versions, deps, README render, stats)
 - [ ] Global search + Cmd+K command palette
-- [ ] Users & teams page
-- [ ] Tokens management page
 - [ ] System settings (storage, auth, SMTP, replication)
-- [ ] Audit log timeline
 - [ ] Profile (theme, language, 2FA)
 - [ ] Accessibility audit (WCAG 2.1 AA target)
 - [ ] Responsive breakpoint pass (≥768px first-class; mobile read-only)
 
-**Faz 7 partial.** The auth → dashboard → repositories path is wired
-end-to-end against the live JSON API; deeper detail pages and admin
-screens land next.
+**Faz 7 substantially done.** Login → dashboard → repositories → tokens →
+audit → users all wired against the live JSON API with full i18n (en/tr)
+and the 5-theme system; sign-out works from the sidebar. Detail pages,
+command palette, and settings/profile screens land next.
 
 ## Faz 8 — Proxy + group repos
 
@@ -268,8 +271,9 @@ screens land next.
       postgres/minio HA blocks
 - [x] systemd unit file at `deploy/systemd/packrune.service` with hardening
 - [x] deploy/README.md walking through Docker, Helm, and systemd paths
-- [ ] Backup + restore CLI commands (deferred)
-- [ ] Multi-arch image build in CI (goreleaser or buildx) (deferred)
-- [ ] Project website / docs site (deferred)
+- [x] `packrune backup` — tar.gz of SQLite + fs storage tree
+- [x] `packrune restore` — inverse, with --force overwrite guard
+- [ ] Multi-arch image build in CI (goreleaser or buildx) — deferred
+- [ ] Project website / docs site — deferred
 - [ ] Dogfood: publish our own Helm chart through our own Helm format
       (post-release)
