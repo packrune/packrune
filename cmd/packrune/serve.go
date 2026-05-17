@@ -11,6 +11,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -19,6 +20,11 @@ import (
 	"github.com/packrune/packrune/internal/config"
 	"github.com/packrune/packrune/internal/db"
 	"github.com/packrune/packrune/internal/format/docker"
+	"github.com/packrune/packrune/internal/format/gomod"
+	"github.com/packrune/packrune/internal/format/helm"
+	"github.com/packrune/packrune/internal/format/maven"
+	"github.com/packrune/packrune/internal/format/npm"
+	"github.com/packrune/packrune/internal/format/pypi"
 	plog "github.com/packrune/packrune/internal/log"
 	"github.com/packrune/packrune/internal/repo"
 	"github.com/packrune/packrune/internal/server"
@@ -93,8 +99,84 @@ func runServe(args []string) error {
 		_ = database.Close()
 		return fmt.Errorf("server: %w", err)
 	}
-	// Docker registry V2 surface.
-	srv.Router().Mount("/v2", dockerHandler)
+	// npm-hosted bootstrap repo.
+	npmRepo, err := repoStore.Ensure(ctx, "npm", "npm", repo.KindHosted, nil)
+	if err != nil {
+		_ = database.Close()
+		return fmt.Errorf("bootstrap npm repo: %w", err)
+	}
+	logger.Info("npm repository ready", "name", npmRepo.Name, "id", npmRepo.ID)
+	npmHandler := npm.NewHandler(npm.HandlerConfig{
+		Logger:  logger,
+		Repo:    npmRepo,
+		Backend: backend,
+		CAS:     contentStore,
+		Store:   repoStore,
+	})
+
+	// helm-hosted bootstrap repo + handler.
+	helmRepo, err := repoStore.Ensure(ctx, "helm", "helm", repo.KindHosted, nil)
+	if err != nil {
+		_ = database.Close()
+		return fmt.Errorf("bootstrap helm repo: %w", err)
+	}
+	logger.Info("helm repository ready", "name", helmRepo.Name, "id", helmRepo.ID)
+	helmHandler := helm.NewHandler(helm.HandlerConfig{
+		Logger:      logger,
+		Repo:        helmRepo,
+		Backend:     backend,
+		CAS:         contentStore,
+		Store:       repoStore,
+		ContextPath: "/helm",
+	})
+
+	// gomod-hosted bootstrap repo + handler.
+	gomodRepo, err := repoStore.Ensure(ctx, "go", "gomod", repo.KindHosted, nil)
+	if err != nil {
+		_ = database.Close()
+		return fmt.Errorf("bootstrap gomod repo: %w", err)
+	}
+	logger.Info("gomod repository ready", "name", gomodRepo.Name, "id", gomodRepo.ID)
+	gomodHandler := gomod.NewHandler(gomod.HandlerConfig{
+		Logger:  logger,
+		Repo:    gomodRepo,
+		Backend: backend,
+		CAS:     contentStore,
+		Store:   repoStore,
+	})
+
+	// pypi-hosted bootstrap repo + handler.
+	pypiRepo, err := repoStore.Ensure(ctx, "pypi", "pypi", repo.KindHosted, nil)
+	if err != nil {
+		_ = database.Close()
+		return fmt.Errorf("bootstrap pypi repo: %w", err)
+	}
+	logger.Info("pypi repository ready", "name", pypiRepo.Name, "id", pypiRepo.ID)
+	pypiHandler := pypi.NewHandler(pypi.HandlerConfig{
+		Logger: logger, Repo: pypiRepo, Backend: backend, CAS: contentStore, Store: repoStore,
+	})
+
+	// maven-hosted bootstrap repo + handler.
+	mavenRepo, err := repoStore.Ensure(ctx, "maven", "maven", repo.KindHosted, nil)
+	if err != nil {
+		_ = database.Close()
+		return fmt.Errorf("bootstrap maven repo: %w", err)
+	}
+	logger.Info("maven repository ready", "name", mavenRepo.Name, "id", mavenRepo.ID)
+	mavenHandler := maven.NewHandler(maven.HandlerConfig{
+		Logger: logger, Repo: mavenRepo, Backend: backend, CAS: contentStore, Store: repoStore,
+	})
+
+	// Each format mounts under a /<prefix> path. chi.Mount routes the
+	// request but doesn't rewrite r.URL.Path; we use http.StripPrefix so the
+	// inner handler sees its own URL space (clean code; less prefix-aware
+	// boilerplate inside each format adapter).
+	srv.Router().Mount("/v2", http.StripPrefix("/v2", dockerHandler))
+	srv.Router().Mount("/npm", http.StripPrefix("/npm", npmHandler))
+	srv.Router().Mount("/helm", http.StripPrefix("/helm", helmHandler))
+	srv.Router().Mount("/go", http.StripPrefix("/go", gomodHandler))
+	srv.Router().Mount("/pypi", http.StripPrefix("/pypi", pypiHandler))
+	srv.Router().Mount("/maven", http.StripPrefix("/maven", mavenHandler))
 
 	// Embedded admin UI. Served from "/" so the SPA fallback works for any
 	// client-side route. API and /v2/ are mounted ahead of this so they win.
