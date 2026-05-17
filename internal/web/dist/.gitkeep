@@ -1,4 +1,0 @@
-# This file exists so the dist/ directory is present at compile time, which
-# is required by the Go //go:embed directive in internal/web. Running
-# `pnpm build` (or `make web-build`) replaces every file in this directory
-# with the real production frontend.
