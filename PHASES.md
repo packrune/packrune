@@ -281,7 +281,9 @@ command palette, and settings/profile screens land next.
 - [x] deploy/README.md walking through Docker, Helm, and systemd paths
 - [x] `packrune backup` — tar.gz of SQLite + fs storage tree
 - [x] `packrune restore` — inverse, with --force overwrite guard
-- [ ] Multi-arch image build in CI (goreleaser or buildx) — deferred
+- [x] Multi-arch image build in CI (.github/workflows/release.yml with
+      docker buildx for linux/amd64 + linux/arm64; static binaries for
+      darwin/linux/windows × amd64/arm64; GitHub Release on tag push)
 - [ ] Project website / docs site — deferred
 - [ ] Dogfood: publish our own Helm chart through our own Helm format
       (post-release)
