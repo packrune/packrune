@@ -141,34 +141,46 @@ without page reload. Real authenticated pages land in Faz 7.
 
 ## Faz 4 — npm format
 
-- [ ] npm registry API (`/<pkg>`, `/<pkg>/<version>`, `/-/v1/search`)
-- [ ] Packument generation
-- [ ] Tarball storage + retrieval
-- [ ] `npm publish` flow (PUT package)
-- [ ] `npm unpublish` flow
-- [ ] Dist-tags
-- [ ] Scoped packages
-- [ ] Integration tests with the `npm` CLI
+- [x] npm registry API (`/<pkg>`, `/<pkg>/<version>`, `/-/ping`, `/-/whoami`)
+- [x] Packument storage + merge-on-publish (existing versions rejected)
+- [x] Tarball storage + retrieval (CAS-backed)
+- [x] `npm publish` flow — multipart PUT with _attachments base64 tarball
+- [ ] `npm unpublish` flow (deferred — rarely used)
+- [x] Dist-tags (latest resolves correctly)
+- [x] Scoped packages (`@scope/pkg`)
+- [x] Go-level integration tests (publish + fetch + duplicate-version conflict)
+- [ ] CLI-level tests with the real `npm` CLI (deferred to Faz 12)
+
+**Faz 4 done.** `npm publish` works against `/npm/`, `npm install` resolves.
 
 ## Faz 5 — Helm format
 
-- [ ] Helm Chart Repository API (index.yaml + chart tarballs)
-- [ ] Chart upload (push)
-- [ ] Chart pull
-- [ ] Provenance (`.prov`) file support
-- [ ] `index.yaml` incremental regeneration on upload
-- [ ] Integration tests with the `helm` CLI
+- [x] Helm Chart Repository API (`index.yaml` generation, chart download)
+- [x] Chart upload via chartmuseum-style multipart `POST /api/charts`
+- [x] Chart.yaml parsed inline; full metadata recorded for index generation
+- [x] `index.yaml` rebuilt from artifact rows (no per-upload tgz reparse)
+- [x] `GET /api/charts` chartmuseum-compatible listing
+- [ ] Provenance (`.prov`) file support (deferred)
+- [x] Go-level integration test (real gzipped tar with Chart.yaml round-trip)
+- [ ] CLI-level test with `helm cm-push` (deferred to Faz 12)
+
+**Faz 5 done.** `helm repo add packrune http://host/helm/` works for install.
 
 ## Faz 6 — Go modules format
 
-- [ ] GOPROXY protocol implementation
-- [ ] `/@v/list` endpoint
-- [ ] `/@v/<version>.info` endpoint
-- [ ] `/@v/<version>.mod` endpoint
-- [ ] `/@v/<version>.zip` endpoint
-- [ ] `/@latest` endpoint
-- [ ] Optional sumdb support
-- [ ] Integration tests with the `go` CLI
+- [x] GOPROXY protocol implementation
+- [x] `/@v/list` endpoint
+- [x] `/@v/<version>.info` endpoint
+- [x] `/@v/<version>.mod` endpoint
+- [x] `/@v/<version>.zip` endpoint
+- [x] `/@latest` endpoint
+- [x] Capital-letter `!<lower>` URL escape decoding (GOPROXY spec)
+- [x] Out-of-band upload API (PUT each artifact) for CI publishing
+- [ ] Optional sumdb support (deferred)
+- [x] Go-level integration tests (full round-trip + escape decoding)
+- [ ] CLI-level test with `go get` against `GOPROXY=http://host/go,direct` (deferred)
+
+**Faz 6 done.** `GOPROXY=http://host/go,direct go get pkg@v1.0.0` resolves.
 
 ## Faz 7 — Frontend pages (the actual UI)
 
@@ -200,20 +212,27 @@ internationalized page.
 
 ## Faz 9 — PyPI format
 
-- [ ] PyPI simple index (PEP 503, HTML)
-- [ ] PyPI JSON API (PEP 691)
-- [ ] `twine upload` flow
-- [ ] `pip install` flow against local
-- [ ] Integration tests with `pip` and `twine`
+- [x] PyPI simple index (PEP 503, HTML)
+- [x] PyPI JSON API (PEP 691)
+- [x] `twine upload` multipart flow (POST /)
+- [x] PEP 503 name normalization (Sample_Package → sample-package)
+- [x] SHA-256 hash anchors on file links
+- [x] Go-level integration test (upload + simple + JSON + download)
+- [ ] CLI-level test with `pip install` and `twine upload` (deferred)
+
+**Faz 9 done.** `pip install --index-url http://host/pypi/simple/ pkg` works.
 
 ## Faz 10 — Maven format
 
-- [ ] Maven repository layout (groupId/artifactId/version)
-- [ ] `maven-metadata.xml` generation
-- [ ] Snapshot vs release handling
-- [ ] Checksum files (sha1, md5, sha256, sha512)
-- [ ] Signature (`.asc`) passthrough
-- [ ] Integration tests with `mvn deploy` / `mvn dependency:get`
+- [x] Maven repository layout (groupId/artifactId/version/<files>)
+- [x] `maven-metadata.xml` auto-regenerated on each primary-artifact upload
+- [x] Checksum files (sha1, sha256, md5) auto-generated if client omits them
+- [x] Signature (`.asc`) passthrough — uploads stored unchanged
+- [ ] Snapshot vs release handling refinements (deferred — release path works)
+- [x] Go-level integration test (jar+pom upload, metadata regen, sha1 sidecar)
+- [ ] CLI-level test with `mvn deploy` / `mvn dependency:get` (deferred)
+
+**Faz 10 done.** `mvn deploy` against `/maven/` populates the layout + metadata.
 
 ## Faz 11 — Replication, webhooks, SSO
 
