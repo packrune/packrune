@@ -2,10 +2,10 @@
 // Copyright (C) 2026 Packrune Contributors
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RouterProvider } from "@tanstack/react-router";
 
-import { AuroraBackground } from "./components/AuroraBackground";
 import { ThemeProvider } from "./themes/ThemeProvider";
-import { Landing } from "./pages/Landing";
+import { router } from "./router";
 import "./i18n";
 
 const queryClient = new QueryClient({
@@ -18,17 +18,11 @@ const queryClient = new QueryClient({
   },
 });
 
-/**
- * App root. Once Faz 7 lands and we have multiple routes, this becomes the
- * TanStack Router host; today it renders the Landing page directly so the
- * scaffold can be validated visually.
- */
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuroraBackground />
-        <Landing />
+        <RouterProvider router={router} />
       </ThemeProvider>
     </QueryClientProvider>
   );

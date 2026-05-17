@@ -6,6 +6,9 @@ import { useTranslation } from "react-i18next";
 import { ArrowRight, FileCode, Heart, Zap } from "lucide-react";
 import { motion } from "motion/react";
 
+import { Link } from "@tanstack/react-router";
+
+import { AuroraBackground } from "../components/AuroraBackground";
 import { Glass } from "../components/Glass";
 import { useTheme } from "../themes/ThemeProvider";
 import { SUPPORTED_LANGUAGES, changeLanguage } from "../i18n";
@@ -31,6 +34,7 @@ export function Landing() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-start px-6 pb-24 pt-12 sm:pt-20">
+      <AuroraBackground />
       <div className="absolute right-4 top-4 z-20 flex gap-2">
         <select
           value={theme.slug}
@@ -78,13 +82,13 @@ export function Landing() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
+          <Link
+            to="/login"
             className="group flex items-center gap-2 rounded-full bg-[color:var(--accent)] px-5 py-2.5 text-sm font-medium text-[color:var(--accent-fg)] transition-transform hover:scale-[1.02]"
           >
             {t("landing.ctaPrimary")}
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-          </button>
+          </Link>
           <a
             href="https://github.com/packrune/packrune/blob/main/PHASES.md"
             target="_blank"

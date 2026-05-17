@@ -18,6 +18,10 @@
     "signIn": "Giriş yap",
     "signOut": "Çıkış yap"
   },
+  "common": {
+    "loading": "Yükleniyor…",
+    "empty": "Henüz bir şey yok."
+  },
   "landing": {
     "headline": "Tek binary. Tüm formatlar. Sonsuza dek ücretsiz.",
     "subhead": "Docker, npm, Helm, Go, PyPI, Maven — hepsi tek self-hosted serviste. Lisans anahtarı sormaz, asla.",
@@ -29,6 +33,35 @@
     "featureFastBody": "Tek bir Go binary. Pure-Go SQLite sayesinde CGO yok, JVM yok, sürpriz yok.",
     "featureUnifiedTitle": "Her format",
     "featureUnifiedBody": "Docker, npm, Helm, Go, PyPI, Maven ilk günden. Tek bir Format arabirimi, plugin karmaşası yok."
+  },
+  "login": {
+    "subtitle": "Packrune kurulumuna giriş yap.",
+    "username": "Kullanıcı adı veya e-posta",
+    "password": "Parola",
+    "signingIn": "Giriliyor…",
+    "failed": "Giriş başarısız. Bilgilerini kontrol edip tekrar dene.",
+    "helpHint": "Henüz hesabın yok mu? Sunucuda şu komutla oluştur:"
+  },
+  "dashboard": {
+    "greeting": "Tekrar hoş geldin, {{name}}",
+    "subtitle": "Packrune kurulumuna genel bakış.",
+    "statRepos": "Depo",
+    "statArtifacts": "Artifact",
+    "statFormats": "Aktif format",
+    "repositoriesTitle": "Depolar",
+    "viewAll": "Tümünü gör",
+    "perFormat": "Format başına artifact",
+    "empty": "Henüz veri yok — ilk artifact'i yükleyince burası dolacak.",
+    "youTitle": "Sen",
+    "username": "Kullanıcı adı",
+    "email": "E-posta",
+    "role": "Rol",
+    "artifactCount": "{{count}} artifact"
+  },
+  "repositories": {
+    "title": "Depolar",
+    "subtitle": "Packrune'un bildiği tüm artifact depoları.",
+    "artifactCount": "{{count}} artifact"
   },
   "theme": {
     "label": "Tema",

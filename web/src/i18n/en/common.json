@@ -18,6 +18,10 @@
     "signIn": "Sign in",
     "signOut": "Sign out"
   },
+  "common": {
+    "loading": "Loading…",
+    "empty": "Nothing here yet."
+  },
   "landing": {
     "headline": "One binary. Every format. Forever free.",
     "subhead": "Docker, npm, Helm, Go, PyPI, Maven — all in a single self-hosted service that never asks for a license key.",
@@ -29,6 +33,37 @@
     "featureFastBody": "A single Go binary. Pure-Go SQLite means no CGO, no JVM, no surprises.",
     "featureUnifiedTitle": "Every format",
     "featureUnifiedBody": "Docker, npm, Helm, Go, PyPI, Maven on day one. One Format interface, no plugin sprawl."
+  },
+  "login": {
+    "subtitle": "Sign in to your Packrune instance.",
+    "username": "Username or email",
+    "password": "Password",
+    "signingIn": "Signing in…",
+    "failed": "Sign-in failed. Check your credentials and try again.",
+    "helpHint": "No account yet? Bootstrap one on the server with"
+  },
+  "dashboard": {
+    "greeting": "Welcome back, {{name}}",
+    "subtitle": "Overview of your Packrune instance.",
+    "statRepos": "Repositories",
+    "statArtifacts": "Artifacts",
+    "statFormats": "Active formats",
+    "repositoriesTitle": "Repositories",
+    "viewAll": "View all",
+    "perFormat": "Artifacts per format",
+    "empty": "No data yet — push your first artifact to see this fill up.",
+    "youTitle": "You",
+    "username": "Username",
+    "email": "Email",
+    "role": "Role",
+    "artifactCount": "{{count}} artifacts",
+    "artifactCount_one": "{{count}} artifact"
+  },
+  "repositories": {
+    "title": "Repositories",
+    "subtitle": "Every artifact bucket Packrune knows about.",
+    "artifactCount": "{{count}} artifacts",
+    "artifactCount_one": "{{count}} artifact"
   },
   "theme": {
     "label": "Theme",

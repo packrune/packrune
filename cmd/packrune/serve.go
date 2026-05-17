@@ -17,6 +17,8 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/packrune/packrune/internal/api"
+	"github.com/packrune/packrune/internal/auth"
 	"github.com/packrune/packrune/internal/config"
 	"github.com/packrune/packrune/internal/db"
 	"github.com/packrune/packrune/internal/format/docker"
@@ -177,6 +179,16 @@ func runServe(args []string) error {
 	srv.Router().Mount("/go", http.StripPrefix("/go", gomodHandler))
 	srv.Router().Mount("/pypi", http.StripPrefix("/pypi", pypiHandler))
 	srv.Router().Mount("/maven", http.StripPrefix("/maven", mavenHandler))
+
+	// JSON admin API.
+	authSvc := auth.NewDBService(database)
+	jsonAPI := &api.API{
+		Logger:  logger,
+		Auth:    authSvc,
+		Store:   repoStore,
+		Version: version, Commit: commit, Date: date,
+	}
+	srv.Router().Mount("/api", jsonAPI.Router())
 
 	// Embedded admin UI. Served from "/" so the SPA fallback works for any
 	// client-side route. API and /v2/ are mounted ahead of this so they win.
