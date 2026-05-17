@@ -63,6 +63,13 @@
     "subtitle": "Packrune'un bildiği tüm artifact depoları.",
     "artifactCount": "{{count}} artifact"
   },
+  "repositoryDetail": {
+    "backToRepos": "Tüm depolar",
+    "filterPlaceholder": "Yola göre filtrele (alt dize)",
+    "empty": "Bu depoda henüz artifact yok.",
+    "truncated": "{{total}} arasından {{shown}} gösteriliyor — daha fazlası için filtreyi daraltabilirsin.",
+    "artifactCount": "{{count}} artifact"
+  },
   "audit": {
     "title": "Denetim kaydı",
     "subtitle": "Tüm kimlik doğrulama ve yazma eylemleri, en yenisi önce.",
