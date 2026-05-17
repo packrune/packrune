@@ -26,9 +26,12 @@ jobs:
       - name: golangci-lint
         # v7 of the action is required for golangci-lint v2.x; the v1→v2
         # bump landed in golangci-lint itself and the action gates on it.
+        # `latest` to pick up a build compiled against Go 1.25 — earlier
+        # 2.x releases (v2.0–v2.1) were still built with Go 1.24 and
+        # refused projects whose go.mod targets 1.25.
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.1.6
+          version: latest
           args: --timeout=5m
 
   test:
