@@ -29,11 +29,13 @@ import (
 )
 
 type Handler struct {
-	logger  *slog.Logger
-	repoID  string
-	backend storage.Backend
-	cas     *cas.CAS
-	store   *repo.Store
+	logger   *slog.Logger
+	repoID   string
+	repoKind string
+	proxy    ProxyConfig
+	backend  storage.Backend
+	cas      *cas.CAS
+	store    *repo.Store
 }
 
 type HandlerConfig struct {
@@ -46,11 +48,13 @@ type HandlerConfig struct {
 
 func NewHandler(cfg HandlerConfig) *Handler {
 	return &Handler{
-		logger:  cfg.Logger,
-		repoID:  cfg.Repo.ID,
-		backend: cfg.Backend,
-		cas:     cfg.CAS,
-		store:   cfg.Store,
+		logger:   cfg.Logger,
+		repoID:   cfg.Repo.ID,
+		repoKind: string(cfg.Repo.Kind),
+		proxy:    ParseProxyConfig(cfg.Repo.Config),
+		backend:  cfg.Backend,
+		cas:      cfg.CAS,
+		store:    cfg.Store,
 	}
 }
 
@@ -73,6 +77,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) serveFile(w http.ResponseWriter, r *http.Request, p string) {
 	art, err := h.store.GetArtifact(r.Context(), h.repoID, "files/"+p)
 	if err != nil {
+		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
+			body, perr := h.proxyFetchFile(r.Context(), p)
+			if perr == nil {
+				w.Header().Set("Content-Type", contentTypeFor(p))
+				w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+				if r.Method != http.MethodHead {
+					_, _ = w.Write(body)
+				}
+				return
+			}
+		}
 		if errors.Is(err, repo.ErrNotFound) {
 			http.NotFound(w, r)
 			return

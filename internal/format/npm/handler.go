@@ -24,11 +24,13 @@ import (
 
 // Handler serves the npm registry surface for one Packrune npm repository.
 type Handler struct {
-	logger  *slog.Logger
-	repoID  string
-	backend storage.Backend
-	cas     *cas.CAS
-	store   *repo.Store
+	logger   *slog.Logger
+	repoID   string
+	repoKind string
+	proxy    ProxyConfig
+	backend  storage.Backend
+	cas      *cas.CAS
+	store    *repo.Store
 }
 
 // HandlerConfig is the dependency bundle passed to NewHandler.
@@ -43,11 +45,13 @@ type HandlerConfig struct {
 // NewHandler constructs a Handler bound to one Packrune npm repository.
 func NewHandler(cfg HandlerConfig) *Handler {
 	return &Handler{
-		logger:  cfg.Logger,
-		repoID:  cfg.Repo.ID,
-		backend: cfg.Backend,
-		cas:     cfg.CAS,
-		store:   cfg.Store,
+		logger:   cfg.Logger,
+		repoID:   cfg.Repo.ID,
+		repoKind: string(cfg.Repo.Kind),
+		proxy:    ParseProxyConfig(cfg.Repo.Config),
+		backend:  cfg.Backend,
+		cas:      cfg.CAS,
+		store:    cfg.Store,
 	}
 }
 
@@ -111,6 +115,18 @@ func (h *Handler) handlePackument(w http.ResponseWriter, r *http.Request, pkg st
 func (h *Handler) servePackument(w http.ResponseWriter, r *http.Request, pkg string, headOnly bool) {
 	art, err := h.store.GetArtifact(r.Context(), h.repoID, "packuments/"+pkg)
 	if err != nil {
+		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
+			body, perr := h.proxyFetchPackument(r.Context(), pkg)
+			if perr == nil {
+				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+				w.WriteHeader(http.StatusOK)
+				if !headOnly {
+					_, _ = w.Write(body)
+				}
+				return
+			}
+		}
 		if errors.Is(err, repo.ErrNotFound) {
 			writeError(w, http.StatusNotFound, "package not found")
 			return
@@ -185,6 +201,18 @@ func (h *Handler) handleTarball(w http.ResponseWriter, r *http.Request, pkg, fil
 	}
 	art, err := h.store.GetArtifact(r.Context(), h.repoID, "tarballs/"+pkg+"/"+filename)
 	if err != nil {
+		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
+			body, perr := h.proxyFetchTarball(r.Context(), pkg, filename)
+			if perr == nil {
+				w.Header().Set("Content-Type", "application/octet-stream")
+				w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+				w.WriteHeader(http.StatusOK)
+				if r.Method != http.MethodHead {
+					_, _ = w.Write(body)
+				}
+				return
+			}
+		}
 		writeError(w, http.StatusNotFound, "tarball not found")
 		return
 	}

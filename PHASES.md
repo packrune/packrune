@@ -219,7 +219,15 @@ command palette, and settings/profile screens land next.
       before storing; mismatches are dropped
 - [x] Go-level integration test (fake upstream → proxy fetch → second-fetch
       from cache → blob proxy)
-- [ ] Per-format proxy support: npm, Helm, Go, PyPI, Maven (deferred)
+- [x] Per-format proxy support: **npm** (packument + tarball fall-through)
+- [x] Per-format proxy support: **Helm** (chart tarball fall-through; index
+      stays generated from cached charts)
+- [x] Per-format proxy support: **Go modules** (every @v/* file falls through)
+- [x] Per-format proxy support: **Maven** (every layout file falls through;
+      maven-metadata.xml fetched but not cached, so version lists stay fresh)
+- [ ] Per-format proxy support: PyPI simple HTML rewriting (deferred —
+      file proxy works once cached, but the simple/<pkg>/ HTML still needs
+      URL rewriting to point at us)
 - [ ] Cache eviction policy (LRU + age) — deferred
 - [ ] Cache invalidation hooks — deferred
 - [ ] Group repository resolver (first-match across members) — deferred

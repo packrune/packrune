@@ -29,11 +29,13 @@ import (
 
 // Handler serves the Helm registry surface for one Packrune helm repository.
 type Handler struct {
-	logger  *slog.Logger
-	repoID  string
-	backend storage.Backend
-	cas     *cas.CAS
-	store   *repo.Store
+	logger   *slog.Logger
+	repoID   string
+	repoKind string
+	proxy    ProxyConfig
+	backend  storage.Backend
+	cas      *cas.CAS
+	store    *repo.Store
 	// ContextPath is reported in /index.yaml's serverInfo so clients fetching
 	// the index get the right base URL for charts.
 	contextPath string
@@ -54,6 +56,8 @@ func NewHandler(cfg HandlerConfig) *Handler {
 	return &Handler{
 		logger:      cfg.Logger,
 		repoID:      cfg.Repo.ID,
+		repoKind:    string(cfg.Repo.Kind),
+		proxy:       ParseProxyConfig(cfg.Repo.Config),
 		backend:     cfg.Backend,
 		cas:         cfg.CAS,
 		store:       cfg.Store,
@@ -111,6 +115,15 @@ func (h *Handler) handleDownload(w http.ResponseWriter, r *http.Request, filenam
 		}
 	}
 	if match == nil {
+		if h.repoKind == "proxy" {
+			body, perr := h.proxyFetchChart(r.Context(), filename)
+			if perr == nil {
+				w.Header().Set("Content-Type", "application/octet-stream")
+				w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+				_, _ = w.Write(body)
+				return
+			}
+		}
 		http.NotFound(w, r)
 		return
 	}
