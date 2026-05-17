@@ -263,6 +263,30 @@ func (s *DBService) DeactivateUser(ctx context.Context, userID string) error {
 	return nil
 }
 
+// SetPasswordByUsername rehashes and stores a new password for the user with
+// the given username (or email). Returns ErrNotFound if no such user.
+func (s *DBService) SetPasswordByUsername(ctx context.Context, identifier, newPassword string) error {
+	hash, err := HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+	q := s.db.Rebind(`UPDATE users SET password_hash = ?, updated_at = ?
+		WHERE username = ? OR email = ?`)
+	res, err := s.db.ExecContext(ctx, q, hash, time.Now().UTC(), identifier, identifier)
+	if err != nil {
+		return fmt.Errorf("auth: set password: %w", err)
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return ErrNotFound
+	}
+	// Force re-login: revoke every existing session token for this user.
+	_, _ = s.db.ExecContext(ctx,
+		s.db.Rebind(`DELETE FROM tokens WHERE user_id IN (SELECT id FROM users WHERE username = ? OR email = ?)`),
+		identifier, identifier)
+	return nil
+}
+
 func boolToInt(b bool) int {
 	if b {
 		return 1

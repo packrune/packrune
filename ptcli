@@ -150,10 +150,13 @@ op_full_run() {
     return
   fi
   ensure_binary
+  local created_default=0
   if ! admin_exists; then
-    warn "Admin yok — varsayılan oluşturuluyor: berk / packrune-rocks"
-    ./bin/packrune users add --email berk@relteco.com --username berk \
-      --password packrune-rocks --admin >/dev/null
+    warn "Hiç admin yok — varsayılan oluşturuluyor: berk / packrune-rocks"
+    if ./bin/packrune users add --email berk@relteco.com --username berk \
+        --password packrune-rocks --admin >/dev/null 2>&1; then
+      created_default=1
+    fi
   fi
   printf "\n"
   printf "  ${BOLD}${GREEN}Packrune ayağa kalkıyor${RESET}\n"
@@ -168,7 +171,22 @@ op_full_run() {
   printf "  ${CYAN}Maven 2${RESET}         ${GRAY}→${RESET}  http://localhost:8080/maven/\n"
   printf "  ${CYAN}Health${RESET}          ${GRAY}→${RESET}  http://localhost:8080/healthz\n"
   printf "  ${GRAY}────────────────────────────────────────────${RESET}\n"
-  printf "  ${CYAN}Admin${RESET}           ${GRAY}→${RESET}  berk / packrune-rocks\n"
+  if [ "$created_default" -eq 1 ]; then
+    printf "  ${CYAN}Admin${RESET}           ${GRAY}→${RESET}  ${GREEN}berk / packrune-rocks${RESET}  ${DIM}(yeni oluşturuldu)${RESET}\n"
+  else
+    # Show existing admins by name only — never reveal credentials we don't know.
+    local existing_admins=""
+    if has_cmd sqlite3 && [ -f data/packrune.db ]; then
+      existing_admins="$(echo 'SELECT username FROM users WHERE is_admin=1 LIMIT 5;' \
+        | sqlite3 data/packrune.db 2>/dev/null | tr '\n' ',' | sed 's/,$//;s/,/, /g')"
+    fi
+    if [ -n "$existing_admins" ]; then
+      printf "  ${CYAN}Admin(s)${RESET}        ${GRAY}→${RESET}  %s\n" "$existing_admins"
+      printf "  ${DIM}(parolayı unuttuysan menüde 21 → Reset password)${RESET}\n"
+    else
+      printf "  ${CYAN}Admin${RESET}           ${GRAY}→${RESET}  ${YELLOW}bilinmiyor${RESET}  ${DIM}(menüde 19 ile ekle)${RESET}\n"
+    fi
+  fi
   printf "  ${YELLOW}Ctrl+C ile durdur${RESET}\n\n"
   ./bin/packrune
 }
@@ -247,6 +265,20 @@ op_add_user() {
   set -- users add --email "$e" --username "$u" --password "$p"
   case "$isAdmin" in y|Y|yes|YES) set -- "$@" --admin ;; esac
   ./bin/packrune "$@"
+}
+
+op_list_users() {
+  ensure_binary
+  ./bin/packrune users list
+}
+
+op_reset_password() {
+  ensure_binary
+  printf "${CYAN}Kullanıcı adı veya email${RESET}: "; read -r who
+  if [ -z "$who" ]; then err "İsim gerekli."; return; fi
+  printf "${CYAN}Yeni parola${RESET}: "; read -r pw
+  if [ -z "$pw" ]; then err "Parola boş olamaz."; return; fi
+  ./bin/packrune users passwd --username "$who" --password "$pw"
 }
 
 op_backup() {
@@ -369,14 +401,16 @@ print_menu() {
 
   printf "    ${BOLD}${PURPLE}Admin${RESET}\n"
   printf "      ${GREEN}19${RESET}  Add user\n"
-  printf "      ${GREEN}20${RESET}  Backup\n"
-  printf "      ${GREEN}21${RESET}  Restore\n"
-  printf "      ${GREEN}22${RESET}  GC orphan blobs\n\n"
+  printf "      ${GREEN}20${RESET}  List users\n"
+  printf "      ${GREEN}21${RESET}  ${BOLD}Reset password${RESET}  ${GRAY}(parolayı unuttuysan)${RESET}\n"
+  printf "      ${GREEN}22${RESET}  Backup\n"
+  printf "      ${GREEN}23${RESET}  Restore\n"
+  printf "      ${GREEN}24${RESET}  GC orphan blobs\n\n"
 
   printf "    ${BOLD}${PURPLE}Helpers${RESET}\n"
-  printf "      ${GREEN}23${RESET}  Open UI in browser\n"
-  printf "      ${GREEN}24${RESET}  Show all endpoints + CLI cheatsheet\n"
-  printf "      ${GREEN}25${RESET}  Git status / PHASES progress\n\n"
+  printf "      ${GREEN}25${RESET}  Open UI in browser\n"
+  printf "      ${GREEN}26${RESET}  Show all endpoints + CLI cheatsheet\n"
+  printf "      ${GREEN}27${RESET}  Git status / PHASES progress\n\n"
 
   printf "      ${RED} 0${RESET}  Quit\n"
 }
@@ -403,12 +437,14 @@ dispatch() {
     17|docker-down|down) op_docker_down ;;
     18|logs)         op_docker_logs ;;
     19|adduser|user) op_add_user ;;
-    20|backup)       op_backup ;;
-    21|restore)      op_restore ;;
-    22|gc)           op_gc ;;
-    23|open|ui)      op_open_ui ;;
-    24|endpoints)    op_show_endpoints ;;
-    25|git|status)   op_git_status ;;
+    20|list-users|users) op_list_users ;;
+    21|passwd|reset-password) op_reset_password ;;
+    22|backup)       op_backup ;;
+    23|restore)      op_restore ;;
+    24|gc)           op_gc ;;
+    25|open|ui)      op_open_ui ;;
+    26|endpoints)    op_show_endpoints ;;
+    27|git|status)   op_git_status ;;
     0|q|Q|quit|exit) printf "\n  ${PINK}görüşürüz paşam ✨${RESET}\n\n"; exit 0 ;;
     *)               err "Geçersiz seçim: $c" ;;
   esac

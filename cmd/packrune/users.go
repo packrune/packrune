@@ -28,15 +28,99 @@ import (
 func runUsers(args []string) error {
 	if len(args) == 0 {
 		fmt.Println(`Usage:
-  packrune users add --email E --username U [--admin] [--password P]`)
+  packrune users add --email E --username U [--admin] [--password P]
+  packrune users list
+  packrune users passwd --username U [--password P]`)
 		return fmt.Errorf("missing subcommand")
 	}
 	switch args[0] {
 	case "add":
 		return runUsersAdd(args[1:])
+	case "list", "ls":
+		return runUsersList(args[1:])
+	case "passwd", "password":
+		return runUsersPasswd(args[1:])
 	default:
 		return fmt.Errorf("unknown users subcommand %q", args[0])
 	}
+}
+
+func runUsersList(args []string) error {
+	fs := flag.NewFlagSet("users list", flag.ContinueOnError)
+	configPath := fs.String("config", "packrune.yaml", "path to config file")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	cfg, err := config.Load(*configPath, false)
+	if err != nil {
+		return fmt.Errorf("config: %w", err)
+	}
+	ctx := context.Background()
+	database, err := db.Open(ctx, cfg.Database)
+	if err != nil {
+		return fmt.Errorf("db: %w", err)
+	}
+	defer database.Close()
+	if err := database.ApplyMigrations(ctx, migrations.FS()); err != nil {
+		return fmt.Errorf("db: migrate: %w", err)
+	}
+	users, err := auth.NewDBService(database).ListUsers(ctx)
+	if err != nil {
+		return err
+	}
+	if len(users) == 0 {
+		fmt.Println("(no users — create one with `packrune users add`)")
+		return nil
+	}
+	fmt.Printf("%-26s  %-22s  %-7s  %-7s  %s\n", "USERNAME", "EMAIL", "ADMIN", "ACTIVE", "CREATED")
+	for _, u := range users {
+		fmt.Printf("%-26s  %-22s  %-7v  %-7v  %s\n",
+			u.Username, u.Email, u.IsAdmin, u.IsActive, u.CreatedAt.Format("2006-01-02 15:04"))
+	}
+	return nil
+}
+
+func runUsersPasswd(args []string) error {
+	fs := flag.NewFlagSet("users passwd", flag.ContinueOnError)
+	configPath := fs.String("config", "packrune.yaml", "path to config file")
+	username := fs.String("username", "", "username or email (required)")
+	password := fs.String("password", "", "new password (prompts if empty)")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if *username == "" {
+		fs.Usage()
+		return fmt.Errorf("--username (or email) is required")
+	}
+
+	cfg, err := config.Load(*configPath, false)
+	if err != nil {
+		return fmt.Errorf("config: %w", err)
+	}
+
+	pw := *password
+	if pw == "" {
+		pw, err = promptPassword()
+		if err != nil {
+			return err
+		}
+	}
+
+	ctx := context.Background()
+	database, err := db.Open(ctx, cfg.Database)
+	if err != nil {
+		return fmt.Errorf("db: %w", err)
+	}
+	defer database.Close()
+	if err := database.ApplyMigrations(ctx, migrations.FS()); err != nil {
+		return fmt.Errorf("db: migrate: %w", err)
+	}
+	svc := auth.NewDBService(database)
+	if err := svc.SetPasswordByUsername(ctx, *username, pw); err != nil {
+		return err
+	}
+	fmt.Printf("password updated for %s (existing sessions invalidated)\n", *username)
+	return nil
 }
 
 func runUsersAdd(args []string) error {
