@@ -48,7 +48,7 @@ func parseChart(r io.Reader) (chartMetadata, error) {
 	if err != nil {
 		return chartMetadata{}, fmt.Errorf("helm: gunzip: %w", err)
 	}
-	defer gz.Close()
+	defer func() { _ = gz.Close() }()
 
 	tr := tar.NewReader(gz)
 	for {

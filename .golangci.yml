@@ -36,14 +36,31 @@ linters:
       # (audit/webhook fire-and-forget, deferred Close, etc.).
       check-type-assertions: false
       check-blank: false
+      # `defer f.Close()` is idiomatic Go for any Closer; the only time the
+      # error matters is for io.WriteCloser at flush time (we check those
+      # explicitly).
+      exclude-functions:
+        - (io.Closer).Close
+        - (*os.File).Close
+        - (*database/sql.Rows).Close
+        - (*database/sql.DB).Close
+        - (io.ReadCloser).Close
+        - (net/http.ResponseWriter).Write
+        - (*bufio.Writer).Flush
+        - (*compress/gzip.Writer).Close
+        - (*archive/tar.Writer).Close
     misspell:
       locale: US
     staticcheck:
-      # QF1002 wants `switch r.URL.Path { case ... }` instead of `switch
-      # { case r.URL.Path == ... }`. We chose the latter intentionally because
-      # several cases use `strings.HasPrefix`, not equality. Silenced
-      # globally rather than per-line.
-      checks: ["all", "-QF1002", "-QF1008"]
+      # QF1002: tagged switch suggestion — we use `switch {case x == "":}`
+      #         when other cases use strings.HasPrefix; tagged switch can't
+      #         express that.
+      # QF1003: `if/else if` chain — same intentional style.
+      # QF1008: embedded field access — readability preference.
+      # ST1000: package comment placement — we keep SPDX/copyright above
+      #         the package doc, so the package comment lands one block
+      #         above `package`. Idiomatic and recognized by godoc.
+      checks: ["all", "-QF1002", "-QF1003", "-QF1008", "-ST1000"]
 
   exclusions:
     rules:

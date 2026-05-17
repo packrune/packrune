@@ -7,9 +7,7 @@ package npm
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
@@ -293,13 +291,11 @@ func (h *Handler) publishPackument(w http.ResponseWriter, r *http.Request, pkg s
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	digest := "sha256:" + hex.EncodeToString(sha256.New().Sum(nil)) // placeholder; replaced below
-	d, _, err := h.cas.Put(r.Context(), bytes.NewReader(out))
+	digest, _, err := h.cas.Put(r.Context(), bytes.NewReader(out))
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	digest = d
 	if err := h.store.UpsertArtifact(
 		r.Context(), h.repoID, "packuments/"+pkg, digest, int64(len(out)),
 		"application/json", "",

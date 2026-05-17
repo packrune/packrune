@@ -255,7 +255,7 @@ func (h *Handler) uploadVersionFile(w http.ResponseWriter, r *http.Request, modu
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	_, _ = w.Write([]byte(fmt.Sprintf(`{"ok":true,"module":%q,"version":%q,"ext":%q}`, module, version, ext)))
+	_, _ = fmt.Fprintf(w, `{"ok":true,"module":%q,"version":%q,"ext":%q}`, module, version, ext)
 }
 
 func contentTypeFor(ext string) string {

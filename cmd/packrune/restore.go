@@ -57,7 +57,7 @@ func runRestore(args []string) error {
 	if err != nil {
 		return fmt.Errorf("gunzip: %w", err)
 	}
-	defer gz.Close()
+	defer func() { _ = gz.Close() }()
 	tr := tar.NewReader(gz)
 
 	if err := os.MkdirAll(filepath.Dir(cfg.Database.DSN), 0o755); err != nil {

@@ -194,8 +194,13 @@ func (s *Store) ResolveArtifactsByPrefix(ctx context.Context, repoID, prefix str
 	}
 
 	parent, err := s.GetByID(ctx, repoID)
-	if err != nil {
+	if errors.Is(err, ErrNotFound) {
+		// Caller passed a repo id that doesn't exist; treat as a no-group
+		// fan-out and return whatever direct rows we found.
 		return direct, nil
+	}
+	if err != nil {
+		return nil, err
 	}
 	if parent.Kind != KindGroup {
 		return direct, nil
