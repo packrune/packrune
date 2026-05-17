@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/packrune/packrune/internal/audit"
 	"github.com/packrune/packrune/internal/auth"
 )
 
@@ -32,6 +33,12 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	u, err := a.Auth.AuthenticateBasic(r.Context(), req.Username, req.Password)
 	if err != nil {
+		if a.AuditWriter != nil {
+			_ = a.AuditWriter.Write(r.Context(), audit.Event{
+				Action: "login", Result: audit.ResultDeny, RemoteAddr: r.RemoteAddr,
+				Metadata: map[string]any{"username": req.Username},
+			})
+		}
 		if errors.Is(err, auth.ErrUnauthorized) {
 			writeError(w, http.StatusUnauthorized, "invalid credentials")
 			return
@@ -44,6 +51,12 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "issue session: "+err.Error())
 		return
+	}
+	if a.AuditWriter != nil {
+		_ = a.AuditWriter.Write(r.Context(), audit.Event{
+			UserID: u.ID, Action: "login", Result: audit.ResultAllow,
+			RemoteAddr: r.RemoteAddr,
+		})
 	}
 
 	http.SetCookie(w, &http.Cookie{

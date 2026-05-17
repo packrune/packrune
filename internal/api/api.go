@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/packrune/packrune/internal/audit"
 	"github.com/packrune/packrune/internal/auth"
 	"github.com/packrune/packrune/internal/repo"
 	"github.com/packrune/packrune/internal/webhook"
@@ -25,10 +26,12 @@ import (
 
 // API bundles the JSON API dependencies and constructs the chi sub-router.
 type API struct {
-	Logger   *slog.Logger
-	Auth     *auth.DBService
-	Store    *repo.Store
-	Webhooks *webhook.Service
+	Logger      *slog.Logger
+	Auth        *auth.DBService
+	Store       *repo.Store
+	Webhooks    *webhook.Service
+	Audit       *audit.Reader
+	AuditWriter *audit.Writer
 
 	Version string
 	Commit  string
@@ -64,6 +67,7 @@ func (a *API) Router() chi.Router {
 		r.Get("/webhooks", a.handleListWebhooks)
 		r.Post("/webhooks", a.handleCreateWebhook)
 		r.Delete("/webhooks/{id}", a.handleDeleteWebhook)
+		r.Get("/audit", a.handleListAudit)
 	})
 
 	return r

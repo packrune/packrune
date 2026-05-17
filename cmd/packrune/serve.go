@@ -18,6 +18,7 @@ import (
 	"syscall"
 
 	"github.com/packrune/packrune/internal/api"
+	"github.com/packrune/packrune/internal/audit"
 	"github.com/packrune/packrune/internal/auth"
 	"github.com/packrune/packrune/internal/config"
 	"github.com/packrune/packrune/internal/db"
@@ -181,15 +182,19 @@ func runServe(args []string) error {
 	srv.Router().Mount("/pypi", http.StripPrefix("/pypi", pypiHandler))
 	srv.Router().Mount("/maven", http.StripPrefix("/maven", mavenHandler))
 
-	// JSON admin API + webhook service.
+	// JSON admin API + webhook service + audit reader/writer.
 	authSvc := auth.NewDBService(database)
 	webhookSvc := webhook.New(database, logger)
+	auditReader := audit.NewReader(database)
+	auditWriter := audit.NewWriter(database)
 	jsonAPI := &api.API{
-		Logger:   logger,
-		Auth:     authSvc,
-		Store:    repoStore,
-		Webhooks: webhookSvc,
-		Version:  version, Commit: commit, Date: date,
+		Logger:      logger,
+		Auth:        authSvc,
+		Store:       repoStore,
+		Webhooks:    webhookSvc,
+		Audit:       auditReader,
+		AuditWriter: auditWriter,
+		Version:     version, Commit: commit, Date: date,
 	}
 	srv.Router().Mount("/api", jsonAPI.Router())
 
