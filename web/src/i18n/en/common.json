@@ -65,6 +65,14 @@
     "artifactCount": "{{count}} artifacts",
     "artifactCount_one": "{{count}} artifact"
   },
+  "repositoryDetail": {
+    "backToRepos": "All repositories",
+    "filterPlaceholder": "Filter by path (substring match)",
+    "empty": "No artifacts in this repository yet.",
+    "truncated": "Showing {{shown}} of {{total}} — refine your filter to see more.",
+    "artifactCount": "{{count}} artifacts",
+    "artifactCount_one": "{{count}} artifact"
+  },
   "audit": {
     "title": "Audit log",
     "subtitle": "Every authentication decision and write action, newest first.",

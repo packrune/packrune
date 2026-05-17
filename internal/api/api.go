@@ -51,6 +51,7 @@ func (a *API) Router() chi.Router {
 		r.Get("/me", a.handleMe)
 		r.Get("/repositories", a.handleListRepositories)
 		r.Get("/repositories/{name}/{format}", a.handleGetRepository)
+		r.Get("/repositories/{name}/{format}/artifacts", a.handleListRepositoryArtifacts)
 		r.Get("/formats", a.handleListFormats)
 		r.Get("/system/stats", a.handleSystemStats)
 

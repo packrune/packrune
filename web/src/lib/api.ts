@@ -74,6 +74,15 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await res.json()) as T;
 }
 
+export interface Artifact {
+  id: string;
+  path: string;
+  digest: string;
+  size: number;
+  media_type: string;
+  created_at: string;
+}
+
 export interface Token {
   id: string;
   name: string;
@@ -100,6 +109,14 @@ export const api = {
     }),
   logout: () => call<void>("/api/auth/logout", { method: "POST" }),
   repositories: () => call<{ items: Repository[] }>("/api/repositories"),
+  repository: (name: string, format: string) =>
+    call<Repository>(`/api/repositories/${encodeURIComponent(name)}/${encodeURIComponent(format)}`),
+  repositoryArtifacts: (name: string, format: string, prefix = "") =>
+    call<{ items: Artifact[]; total: number }>(
+      `/api/repositories/${encodeURIComponent(name)}/${encodeURIComponent(format)}/artifacts${
+        prefix ? `?prefix=${encodeURIComponent(prefix)}` : ""
+      }`,
+    ),
   formats: () => call<{ items: { name: string; display_name: string }[] }>("/api/formats"),
   tokens: () => call<{ items: Token[] }>("/api/tokens"),
   createToken: (input: { name: string; scopes: string[]; ttl_hours: number }) =>
@@ -125,6 +142,22 @@ export function useRepositories() {
   return useQuery({
     queryKey: ["repositories"],
     queryFn: api.repositories,
+  });
+}
+
+export function useRepository(name: string, format: string) {
+  return useQuery({
+    queryKey: ["repository", name, format],
+    queryFn: () => api.repository(name, format),
+    enabled: !!name && !!format,
+  });
+}
+
+export function useRepositoryArtifacts(name: string, format: string, prefix = "") {
+  return useQuery({
+    queryKey: ["repository-artifacts", name, format, prefix],
+    queryFn: () => api.repositoryArtifacts(name, format, prefix),
+    enabled: !!name && !!format,
   });
 }
 

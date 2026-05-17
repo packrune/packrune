@@ -3,7 +3,7 @@
 
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Boxes } from "lucide-react";
 
@@ -75,7 +75,15 @@ export function RepositoriesPage() {
                     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
                   }}
                 >
-                  <Glass elevation={2} className="flex h-full flex-col gap-3 p-5">
+                  <Link
+                    to="/repositories/$format/$name"
+                    params={{ format: r.format, name: r.name }}
+                    className="block h-full"
+                  >
+                    <Glass
+                      elevation={2}
+                      className="flex h-full flex-col gap-3 p-5 transition-transform hover:scale-[1.01]"
+                    >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <Boxes size={16} className="text-[color:var(--accent)]" />
@@ -97,7 +105,8 @@ export function RepositoriesPage() {
                     <div className="text-[10px] uppercase tracking-wider text-[color:var(--fg-subtle)]">
                       {new Date(r.created_at).toLocaleDateString()}
                     </div>
-                  </Glass>
+                    </Glass>
+                  </Link>
                 </motion.li>
               ))}
             </motion.ul>

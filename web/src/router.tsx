@@ -13,6 +13,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
 import { RepositoriesPage } from "./pages/RepositoriesPage";
+import { RepositoryDetail } from "./pages/RepositoryDetail";
 import { TokensPage } from "./pages/TokensPage";
 import { UsersPage } from "./pages/UsersPage";
 
@@ -44,6 +45,12 @@ const repositoriesRoute = createRoute({
   component: RepositoriesPage,
 });
 
+const repositoryDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/repositories/$format/$name",
+  component: RepositoryDetail,
+});
+
 const tokensRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/tokens",
@@ -67,6 +74,7 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   dashboardRoute,
   repositoriesRoute,
+  repositoryDetailRoute,
   tokensRoute,
   auditRoute,
   usersRoute,

@@ -70,6 +70,46 @@ func (a *API) handleGetRepository(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type artifactView struct {
+	ID        string    `json:"id"`
+	Path      string    `json:"path"`
+	Digest    string    `json:"digest"`
+	Size      int64     `json:"size"`
+	MediaType string    `json:"media_type"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (a *API) handleListRepositoryArtifacts(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+	fmtName := chi.URLParam(r, "format")
+	x, err := a.Store.Get(r.Context(), name, fmtName)
+	if err != nil {
+		if errors.Is(err, repo.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "not found")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	prefix := r.URL.Query().Get("prefix")
+	arts, err := a.Store.ListArtifactsByPrefix(r.Context(), x.ID, prefix)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	out := make([]artifactView, 0, len(arts))
+	for _, art := range arts {
+		out = append(out, artifactView{
+			ID: art.ID, Path: art.Path, Digest: art.Digest,
+			Size: art.Size, MediaType: art.MediaType, CreatedAt: art.CreatedAt,
+		})
+	}
+	writeJSON(w, http.StatusOK, struct {
+		Items []artifactView `json:"items"`
+		Total int            `json:"total"`
+	}{Items: out, Total: len(out)})
+}
+
 type formatView struct {
 	Name        string `json:"name"`
 	DisplayName string `json:"display_name"`
