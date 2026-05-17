@@ -74,6 +74,15 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await res.json()) as T;
 }
 
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface Artifact {
   id: string;
   path: string;

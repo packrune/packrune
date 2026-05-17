@@ -12,10 +12,12 @@ import { AuditPage } from "./pages/AuditPage";
 import { Dashboard } from "./pages/Dashboard";
 import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
+import { ProfilePage } from "./pages/ProfilePage";
 import { RepositoriesPage } from "./pages/RepositoriesPage";
 import { RepositoryDetail } from "./pages/RepositoryDetail";
 import { TokensPage } from "./pages/TokensPage";
 import { UsersPage } from "./pages/UsersPage";
+import { WebhooksPage } from "./pages/WebhooksPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -69,6 +71,18 @@ const usersRoute = createRoute({
   component: UsersPage,
 });
 
+const webhooksRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/webhooks",
+  component: WebhooksPage,
+});
+
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/profile",
+  component: ProfilePage,
+});
+
 const routeTree = rootRoute.addChildren([
   landingRoute,
   loginRoute,
@@ -78,6 +92,8 @@ const routeTree = rootRoute.addChildren([
   tokensRoute,
   auditRoute,
   usersRoute,
+  webhooksRoute,
+  profileRoute,
 ]);
 
 export const router = createRouter({ routeTree });
