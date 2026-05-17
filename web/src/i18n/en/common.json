@@ -65,6 +65,12 @@
     "artifactCount": "{{count}} artifacts",
     "artifactCount_one": "{{count}} artifact"
   },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Every authentication decision and write action, newest first.",
+    "empty": "No audit records yet — try logging in or out.",
+    "adminOnly": "Admin role required to view the audit log."
+  },
   "tokens": {
     "title": "Access tokens",
     "subtitle": "Issue tokens for CI, automation, or your own clients. Show once — store securely.",

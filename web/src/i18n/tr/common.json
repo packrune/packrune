@@ -63,6 +63,12 @@
     "subtitle": "Packrune'un bildiği tüm artifact depoları.",
     "artifactCount": "{{count}} artifact"
   },
+  "audit": {
+    "title": "Denetim kaydı",
+    "subtitle": "Tüm kimlik doğrulama ve yazma eylemleri, en yenisi önce.",
+    "empty": "Henüz denetim kaydı yok — giriş yapıp deneyebilirsin.",
+    "adminOnly": "Denetim kaydını görüntülemek için admin yetkisi gerekir."
+  },
   "tokens": {
     "title": "Erişim anahtarları",
     "subtitle": "CI, otomasyon veya kendi istemcilerin için anahtar üret. Bir kere gösterilir — güvenli yere kaydet.",

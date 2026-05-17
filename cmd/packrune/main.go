@@ -47,6 +47,8 @@ func dispatch(args []string) error {
 		return runServe(args[1:])
 	case "users":
 		return runUsers(args[1:])
+	case "backup":
+		return runBackup(args[1:])
 	default:
 		// Treat unknown leading args as flags to the default serve command.
 		// `packrune --config foo.yaml` should still work.
@@ -73,6 +75,7 @@ Usage:
   packrune serve [--config FILE]        same as above, explicit
   packrune users add --email E --username U [--admin]
                                         create a user (prompts for password)
+  packrune backup [--output FILE]       snapshot SQLite + fs storage to .tar.gz
   packrune --version                    print version
   packrune --help                       this message
 

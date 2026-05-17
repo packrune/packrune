@@ -8,6 +8,7 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 
+import { AuditPage } from "./pages/AuditPage";
 import { Dashboard } from "./pages/Dashboard";
 import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
@@ -48,12 +49,19 @@ const tokensRoute = createRoute({
   component: TokensPage,
 });
 
+const auditRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/audit",
+  component: AuditPage,
+});
+
 const routeTree = rootRoute.addChildren([
   landingRoute,
   loginRoute,
   dashboardRoute,
   repositoriesRoute,
   tokensRoute,
+  auditRoute,
 ]);
 
 export const router = createRouter({ routeTree });
