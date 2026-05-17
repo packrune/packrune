@@ -51,7 +51,16 @@ func (a *API) Router() chi.Router {
 		r.Get("/formats", a.handleListFormats)
 		r.Get("/system/stats", a.handleSystemStats)
 
+		// Token self-service (admin can manage other users' tokens via
+		// ?user_id=).
+		r.Get("/tokens", a.handleListTokens)
+		r.Post("/tokens", a.handleCreateToken)
+		r.Delete("/tokens/{id}", a.handleRevokeToken)
+
 		// Admin-only (the handler checks IsAdmin and returns 403 otherwise).
+		r.Get("/users", a.handleListUsers)
+		r.Post("/users", a.handleCreateUser)
+		r.Delete("/users/{id}", a.handleDeactivateUser)
 		r.Get("/webhooks", a.handleListWebhooks)
 		r.Post("/webhooks", a.handleCreateWebhook)
 		r.Delete("/webhooks/{id}", a.handleDeleteWebhook)

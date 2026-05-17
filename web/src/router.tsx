@@ -12,6 +12,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
 import { RepositoriesPage } from "./pages/RepositoriesPage";
+import { TokensPage } from "./pages/TokensPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -41,11 +42,18 @@ const repositoriesRoute = createRoute({
   component: RepositoriesPage,
 });
 
+const tokensRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tokens",
+  component: TokensPage,
+});
+
 const routeTree = rootRoute.addChildren([
   landingRoute,
   loginRoute,
   dashboardRoute,
   repositoriesRoute,
+  tokensRoute,
 ]);
 
 export const router = createRouter({ routeTree });

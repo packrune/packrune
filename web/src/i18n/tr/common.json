@@ -63,6 +63,22 @@
     "subtitle": "Packrune'un bildiği tüm artifact depoları.",
     "artifactCount": "{{count}} artifact"
   },
+  "tokens": {
+    "title": "Erişim anahtarları",
+    "subtitle": "CI, otomasyon veya kendi istemcilerin için anahtar üret. Bir kere gösterilir — güvenli yere kaydet.",
+    "newTitle": "Yeni anahtar üret",
+    "namePlaceholder": "İsim (örn. ci-deploy)",
+    "scopesPlaceholder": "Kapsamlar (virgülle ayır)",
+    "ttlPlaceholder": "Geçerlilik (saat, 0 = süresiz)",
+    "issue": "Üret",
+    "issuing": "Üretiliyor…",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!",
+    "copyOnce": "Şimdi kaydet — bir daha gösterilmeyecek.",
+    "revoke": "İptal et",
+    "noScopes": "kapsam yok",
+    "empty": "Henüz anahtarın yok."
+  },
   "theme": {
     "label": "Tema",
     "aurora": "Aurora",

@@ -197,6 +197,72 @@ func (s *DBService) RevokeToken(ctx context.Context, tokenID string) error {
 	return nil
 }
 
+// ListTokens returns every token for a user, ordered by created_at desc.
+// Plaintext values are NEVER returned — only the metadata.
+func (s *DBService) ListTokens(ctx context.Context, userID string) ([]Token, error) {
+	q := s.db.Rebind(`SELECT id, user_id, name, prefix, scopes, last_used_at, expires_at, created_at
+		FROM tokens WHERE user_id = ? ORDER BY created_at DESC`)
+	rows, err := s.db.QueryContext(ctx, q, userID)
+	if err != nil {
+		return nil, fmt.Errorf("auth: list tokens: %w", err)
+	}
+	defer rows.Close()
+	var out []Token
+	for rows.Next() {
+		var t Token
+		var scopesStr string
+		var lastUsed sql.NullTime
+		var expires sql.NullTime
+		if err := rows.Scan(&t.ID, &t.UserID, &t.Name, &t.Prefix, &scopesStr, &lastUsed, &expires, &t.CreatedAt); err != nil {
+			return nil, fmt.Errorf("auth: scan token: %w", err)
+		}
+		if scopesStr != "" {
+			t.Scopes = strings.Split(scopesStr, ",")
+		}
+		if lastUsed.Valid {
+			t.LastUsedAt = &lastUsed.Time
+		}
+		if expires.Valid {
+			t.ExpiresAt = &expires.Time
+		}
+		out = append(out, t)
+	}
+	return out, rows.Err()
+}
+
+// ListUsers returns every user, ordered by created_at desc. Admin-only at
+// the API layer.
+func (s *DBService) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT id, email, username, display_name, is_admin, is_active, created_at, updated_at
+		FROM users ORDER BY created_at DESC`)
+	if err != nil {
+		return nil, fmt.Errorf("auth: list users: %w", err)
+	}
+	defer rows.Close()
+	var out []User
+	for rows.Next() {
+		var u User
+		var isAdmin, isActive int
+		if err := rows.Scan(&u.ID, &u.Email, &u.Username, &u.DisplayName, &isAdmin, &isActive, &u.CreatedAt, &u.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("auth: scan user: %w", err)
+		}
+		u.IsAdmin = isAdmin != 0
+		u.IsActive = isActive != 0
+		out = append(out, u)
+	}
+	return out, rows.Err()
+}
+
+// DeactivateUser sets is_active=0 without deleting the row, preserving
+// referential integrity for tokens / audit log.
+func (s *DBService) DeactivateUser(ctx context.Context, userID string) error {
+	q := s.db.Rebind(`UPDATE users SET is_active = 0, updated_at = ? WHERE id = ?`)
+	if _, err := s.db.ExecContext(ctx, q, time.Now().UTC(), userID); err != nil {
+		return fmt.Errorf("auth: deactivate user: %w", err)
+	}
+	return nil
+}
+
 func boolToInt(b bool) int {
 	if b {
 		return 1

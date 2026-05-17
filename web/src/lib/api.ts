@@ -74,6 +74,21 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await res.json()) as T;
 }
 
+export interface Token {
+  id: string;
+  name: string;
+  prefix: string;
+  scopes: string[];
+  last_used_at?: string;
+  expires_at?: string;
+  created_at: string;
+}
+
+export interface TokenWithPlain {
+  token: Token;
+  plain: string;
+}
+
 export const api = {
   version: () => call<VersionInfo>("/api/system/version"),
   stats: () => call<SystemStats>("/api/system/stats"),
@@ -86,6 +101,13 @@ export const api = {
   logout: () => call<void>("/api/auth/logout", { method: "POST" }),
   repositories: () => call<{ items: Repository[] }>("/api/repositories"),
   formats: () => call<{ items: { name: string; display_name: string }[] }>("/api/formats"),
+  tokens: () => call<{ items: Token[] }>("/api/tokens"),
+  createToken: (input: { name: string; scopes: string[]; ttl_hours: number }) =>
+    call<TokenWithPlain>("/api/tokens", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }),
+  revokeToken: (id: string) => call<void>(`/api/tokens/${id}`, { method: "DELETE" }),
 };
 
 // React Query hooks ---------------------------------------------------------
@@ -127,6 +149,33 @@ export function useFormats() {
     queryKey: ["formats"],
     queryFn: api.formats,
     staleTime: Number.POSITIVE_INFINITY,
+  });
+}
+
+export function useTokens() {
+  return useQuery({
+    queryKey: ["tokens"],
+    queryFn: api.tokens,
+  });
+}
+
+export function useCreateToken() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.createToken,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tokens"] });
+    },
+  });
+}
+
+export function useRevokeToken() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.revokeToken,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tokens"] });
+    },
   });
 }
 

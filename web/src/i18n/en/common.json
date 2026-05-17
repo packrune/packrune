@@ -65,6 +65,22 @@
     "artifactCount": "{{count}} artifacts",
     "artifactCount_one": "{{count}} artifact"
   },
+  "tokens": {
+    "title": "Access tokens",
+    "subtitle": "Issue tokens for CI, automation, or your own clients. Show once — store securely.",
+    "newTitle": "Issue a new token",
+    "namePlaceholder": "Name (e.g. ci-deploy)",
+    "scopesPlaceholder": "Scopes (comma separated)",
+    "ttlPlaceholder": "TTL hours (0 = never)",
+    "issue": "Issue",
+    "issuing": "Issuing…",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "copyOnce": "Save this now — it won't be shown again.",
+    "revoke": "Revoke",
+    "noScopes": "no scopes",
+    "empty": "You have no tokens yet."
+  },
   "theme": {
     "label": "Theme",
     "aurora": "Aurora",
