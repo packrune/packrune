@@ -228,9 +228,11 @@ command palette, and settings/profile screens land next.
 - [x] Per-format proxy support: **Go modules** (every @v/* file falls through)
 - [x] Per-format proxy support: **Maven** (every layout file falls through;
       maven-metadata.xml fetched but not cached, so version lists stay fresh)
-- [ ] Per-format proxy support: PyPI simple HTML rewriting (deferred —
-      file proxy works once cached, but the simple/<pkg>/ HTML still needs
-      URL rewriting to point at us)
+- [x] Per-format proxy support: **PyPI** with PEP 503 HTML rewriting —
+      misses fetch upstream simple/<pkg>/, parse `<a href>` entries with
+      #sha256 fragments, record stub artifact rows pointing at the upstream
+      URL, return rewritten HTML at our /packages/. First /packages/ GET
+      lazy-loads the bytes and replaces the stub with real content.
 - [ ] Cache eviction policy (LRU + age) — deferred
 - [ ] Cache invalidation hooks — deferred
 - [x] Group repository resolver — Store.ResolveArtifact +
