@@ -1,0 +1,435 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-only WITH Commons-Clause
+# Copyright (C) 2026 Packrune Contributors
+#
+# ptcli — Packrune Control CLI. Run from the repo root.
+#
+# Usage:
+#   ./ptcli                 interactive menu
+#   ./ptcli <N>             run menu item N directly (e.g. ./ptcli 7)
+#   ./ptcli <name>          run by name (e.g. ./ptcli full, ./ptcli doctor)
+
+set -u
+
+# ─── colors ─────────────────────────────────────────────────────────────────
+if [ -t 1 ]; then
+  RED=$'\033[0;31m'
+  GREEN=$'\033[0;32m'
+  YELLOW=$'\033[1;33m'
+  BLUE=$'\033[0;34m'
+  PURPLE=$'\033[0;35m'
+  PINK=$'\033[38;5;213m'
+  CYAN=$'\033[0;36m'
+  WHITE=$'\033[1;37m'
+  GRAY=$'\033[0;90m'
+  BOLD=$'\033[1m'
+  DIM=$'\033[2m'
+  RESET=$'\033[0m'
+else
+  RED= GREEN= YELLOW= BLUE= PURPLE= PINK= CYAN= WHITE= GRAY= BOLD= DIM= RESET=
+fi
+
+# ─── helpers ────────────────────────────────────────────────────────────────
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
+info()  { printf "${CYAN}▸${RESET} %s\n"   "$*"; }
+ok()    { printf "${GREEN}✓${RESET} %s\n"  "$*"; }
+warn()  { printf "${YELLOW}!${RESET} %s\n" "$*"; }
+err()   { printf "${RED}✗${RESET} %s\n"    "$*"; }
+dim()   { printf "${DIM}%s${RESET}\n"      "$*"; }
+
+press_enter() {
+  printf "\n${DIM}Devam etmek için Enter'a bas… ${RESET}"
+  IFS= read -r _ || true
+}
+
+has_cmd()       { command -v "$1" >/dev/null 2>&1; }
+port_in_use()   { lsof -iTCP:"$1" -sTCP:LISTEN -n -P >/dev/null 2>&1; }
+binary_exists() { [ -x bin/packrune ]; }
+
+ensure_binary() {
+  if ! binary_exists; then
+    info "bin/packrune yok, build alınıyor…"
+    make build
+  fi
+}
+
+admin_exists() {
+  [ -f data/packrune.db ] && has_cmd sqlite3 &&
+    [ "$(echo 'SELECT COUNT(*) FROM users WHERE is_admin=1;' | sqlite3 data/packrune.db 2>/dev/null || echo 0)" != "0" ]
+}
+
+# ─── banner ─────────────────────────────────────────────────────────────────
+print_banner() {
+  clear
+  printf "\n"
+  printf "${PURPLE}    ██████╗ ████████╗     ██████╗██╗     ██╗${RESET}\n"
+  printf "${PURPLE}    ██╔══██╗╚══██╔══╝    ██╔════╝██║     ██║${RESET}\n"
+  printf "${PINK}    ██████╔╝   ██║       ██║     ██║     ██║${RESET}\n"
+  printf "${PINK}    ██╔═══╝    ██║       ██║     ██║     ██║${RESET}\n"
+  printf "${CYAN}    ██║        ██║       ╚██████╗███████╗██║${RESET}\n"
+  printf "${CYAN}    ╚═╝        ╚═╝        ╚═════╝╚══════╝╚═╝${RESET}\n"
+  printf "\n"
+  printf "${BOLD}    Packrune Control CLI${RESET}\n"
+  printf "${GRAY}    ────────────────────────────────────────────────${RESET}\n"
+  printf "${GRAY}    Author  ${RESET}: ${WHITE}Berk Coşar${RESET}\n"
+  printf "${GRAY}    Email   ${RESET}: ${WHITE}lookmainpoint@gmail.com${RESET}\n"
+  printf "${GRAY}    License ${RESET}: AGPL-3.0 + Commons Clause\n"
+  printf "${GRAY}    Path    ${RESET}: ${DIM}%s${RESET}\n" "$SCRIPT_DIR"
+  # status line
+  local backend_status="${RED}● durduruldu${RESET}"
+  if port_in_use 8080; then backend_status="${GREEN}● ayakta :8080${RESET}"; fi
+  local frontend_status="${GRAY}● kapalı :5173${RESET}"
+  if port_in_use 5173; then frontend_status="${GREEN}● dev :5173${RESET}"; fi
+  printf "${GRAY}    Status  ${RESET}: backend %s   ·   frontend %s\n" "$backend_status" "$frontend_status"
+  printf "\n"
+}
+
+# ─── operations ─────────────────────────────────────────────────────────────
+
+op_doctor() {
+  ensure_binary
+  ./bin/packrune doctor || true
+}
+
+op_first_setup() {
+  info "İlk kurulum başlıyor…"
+  if [ ! -d web/node_modules ]; then
+    info "Frontend bağımlılıkları yükleniyor (pnpm install)…"
+    ( cd web && pnpm install --no-frozen-lockfile )
+  fi
+  info "Frontend build…"
+  ( cd web && pnpm build )
+  info "Backend build…"
+  make build
+  if admin_exists; then
+    ok "Bir admin kullanıcısı zaten var."
+  else
+    local email username password
+    printf "${CYAN}Admin email${RESET} [berk@relteco.com]: "; read -r email
+    email=${email:-berk@relteco.com}
+    printf "${CYAN}Admin kullanıcı adı${RESET} [berk]: "; read -r username
+    username=${username:-berk}
+    printf "${CYAN}Admin parola${RESET} [packrune-rocks]: "; read -r password
+    password=${password:-packrune-rocks}
+    ./bin/packrune users add --email "$email" --username "$username" --password "$password" --admin
+  fi
+  ok "Kurulum tamam. Menüde 7 (Full run) ile başlat."
+}
+
+op_build_all() {
+  info "Frontend build…"
+  ( cd web && pnpm install --no-frozen-lockfile && pnpm build )
+  info "Backend build…"
+  make build
+  ok "Tüm build geçti. Binary: bin/packrune"
+}
+
+op_build_backend() { info "Backend build…"; make build; ok "bin/packrune güncel."; }
+
+op_build_frontend() {
+  info "Frontend build…"
+  ( cd web && pnpm install --no-frozen-lockfile && pnpm build )
+  ok "internal/web/dist güncel. (make build ile binary'i de yenile)"
+}
+
+op_clean() {
+  info "Build artifact'leri siliniyor…"
+  rm -rf bin/ internal/web/dist data/ /tmp/packrune-srv.log
+  mkdir -p internal/web/dist
+  cat > internal/web/dist/index.html <<'EOF'
+<!doctype html><html><body><p>Run <code>./ptcli build-all</code> first.</p></body></html>
+EOF
+  ok "Temiz."
+}
+
+op_full_run() {
+  if port_in_use 8080; then
+    err ":8080 zaten dolu — başka bir packrune çalışıyor olabilir."
+    return
+  fi
+  ensure_binary
+  if ! admin_exists; then
+    warn "Admin yok — varsayılan oluşturuluyor: berk / packrune-rocks"
+    ./bin/packrune users add --email berk@relteco.com --username berk \
+      --password packrune-rocks --admin >/dev/null
+  fi
+  printf "\n"
+  printf "  ${BOLD}${GREEN}Packrune ayağa kalkıyor${RESET}\n"
+  printf "  ${GRAY}────────────────────────────────────────────${RESET}\n"
+  printf "  ${CYAN}UI${RESET}              ${GRAY}→${RESET}  http://localhost:8080\n"
+  printf "  ${CYAN}JSON API${RESET}        ${GRAY}→${RESET}  http://localhost:8080/api\n"
+  printf "  ${CYAN}Docker registry${RESET} ${GRAY}→${RESET}  http://localhost:8080/v2/\n"
+  printf "  ${CYAN}npm registry${RESET}    ${GRAY}→${RESET}  http://localhost:8080/npm/\n"
+  printf "  ${CYAN}Helm repo${RESET}       ${GRAY}→${RESET}  http://localhost:8080/helm/\n"
+  printf "  ${CYAN}GOPROXY${RESET}         ${GRAY}→${RESET}  http://localhost:8080/go/\n"
+  printf "  ${CYAN}PyPI simple${RESET}     ${GRAY}→${RESET}  http://localhost:8080/pypi/simple/\n"
+  printf "  ${CYAN}Maven 2${RESET}         ${GRAY}→${RESET}  http://localhost:8080/maven/\n"
+  printf "  ${CYAN}Health${RESET}          ${GRAY}→${RESET}  http://localhost:8080/healthz\n"
+  printf "  ${GRAY}────────────────────────────────────────────${RESET}\n"
+  printf "  ${CYAN}Admin${RESET}           ${GRAY}→${RESET}  berk / packrune-rocks\n"
+  printf "  ${YELLOW}Ctrl+C ile durdur${RESET}\n\n"
+  ./bin/packrune
+}
+
+op_run_backend() {
+  ensure_binary
+  info "Backend başlatılıyor (:8080) — Ctrl+C ile dur"
+  ./bin/packrune
+}
+
+op_run_frontend() {
+  if port_in_use 5173; then
+    err ":5173 dolu — başka bir vite dev server çalışıyor olabilir."
+    return
+  fi
+  info "Frontend dev server (:5173) başlıyor. Backend ayrı çalışmalı (:8080)."
+  ( cd web && pnpm dev )
+}
+
+op_run_both() {
+  if port_in_use 8080; then warn ":8080 dolu — backend atlanıyor"; else
+    ensure_binary
+    info "Backend arka planda başlatılıyor → /tmp/packrune-srv.log"
+    nohup ./bin/packrune >/tmp/packrune-srv.log 2>&1 &
+    echo $! > /tmp/packrune-srv.pid
+    sleep 1
+    ok "Backend PID $(cat /tmp/packrune-srv.pid)"
+  fi
+  if port_in_use 5173; then warn ":5173 dolu — frontend atlanıyor"; return; fi
+  info "Frontend dev server :5173 başlıyor. Çıkış için Ctrl+C."
+  ( cd web && pnpm dev )
+}
+
+op_test()  { make test; }
+op_lint()  {
+  if has_cmd golangci-lint; then make lint
+  else warn "golangci-lint yok; go vet çalıştırılıyor"; go vet ./...; fi
+}
+op_spdx()  { ./scripts/check-headers.sh; }
+
+op_docker_build() {
+  has_cmd docker || { err "docker bulunamadı"; return; }
+  info "Multi-stage Docker image build (node → golang-alpine → distroless)…"
+  docker build -t packrune:dev .
+  ok "packrune:dev hazır. (docker run --rm -p 8080:8080 packrune:dev)"
+}
+
+op_docker_up() {
+  has_cmd docker || { err "docker bulunamadı"; return; }
+  info "docker compose up -d --build"
+  docker compose up -d --build
+  echo
+  docker compose ps
+  echo
+  ok "UI: http://localhost:8080"
+}
+
+op_docker_down() {
+  has_cmd docker || { err "docker bulunamadı"; return; }
+  docker compose down
+  ok "Konteynerler durduruldu."
+}
+
+op_docker_logs() {
+  has_cmd docker || { err "docker bulunamadı"; return; }
+  info "docker compose logs -f packrune  (Ctrl+C ile çık)"
+  docker compose logs -f
+}
+
+op_add_user() {
+  ensure_binary
+  printf "${CYAN}Email${RESET}: ";          read -r e
+  printf "${CYAN}Kullanıcı adı${RESET}: ";  read -r u
+  printf "${CYAN}Parola${RESET}: ";         read -r p
+  printf "${CYAN}Admin? (y/N)${RESET}: ";   read -r isAdmin
+  set -- users add --email "$e" --username "$u" --password "$p"
+  case "$isAdmin" in y|Y|yes|YES) set -- "$@" --admin ;; esac
+  ./bin/packrune "$@"
+}
+
+op_backup() {
+  ensure_binary
+  local out="packrune-backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+  ./bin/packrune backup --output "$out"
+  ok "Yedek: $out"
+}
+
+op_restore() {
+  ensure_binary
+  printf "${CYAN}.tar.gz yolu${RESET}: "; read -r f
+  if [ ! -f "$f" ]; then err "Dosya yok: $f"; return; fi
+  printf "${YELLOW}Mevcut DB üzerine yazılacak. Emin misin? (y/N)${RESET}: "
+  read -r ok
+  case "$ok" in y|Y|yes|YES) ./bin/packrune restore --input "$f" --force ;;
+                          *) info "İptal." ;;
+  esac
+}
+
+op_gc() {
+  ensure_binary
+  info "Önce dry-run (silmez, sadece raporlar)…"
+  ./bin/packrune gc --dry-run
+  echo
+  printf "${YELLOW}Gerçekten sil? (y/N)${RESET}: "
+  read -r ok
+  case "$ok" in y|Y|yes|YES) ./bin/packrune gc ;; esac
+}
+
+op_open_ui() {
+  local url="http://localhost:8080"
+  if   has_cmd open;     then open "$url"
+  elif has_cmd xdg-open; then xdg-open "$url"
+  else printf "Aç: %s\n" "$url"
+  fi
+  ok "Tarayıcı: $url"
+}
+
+op_show_endpoints() {
+  printf "${BOLD}    Tüm endpoint'ler${RESET}\n\n"
+  printf "    ${CYAN}UI${RESET}                ${GRAY}→${RESET}  http://localhost:8080\n"
+  printf "    ${CYAN}/api${RESET}              ${GRAY}→${RESET}  JSON admin API\n"
+  printf "    ${CYAN}/v2/${RESET}              ${GRAY}→${RESET}  Docker Registry V2\n"
+  printf "    ${CYAN}/npm/${RESET}             ${GRAY}→${RESET}  npm registry\n"
+  printf "    ${CYAN}/helm/${RESET}            ${GRAY}→${RESET}  Helm chart repo\n"
+  printf "    ${CYAN}/go/${RESET}              ${GRAY}→${RESET}  GOPROXY protocol\n"
+  printf "    ${CYAN}/pypi/${RESET}            ${GRAY}→${RESET}  PyPI (simple + JSON)\n"
+  printf "    ${CYAN}/maven/${RESET}           ${GRAY}→${RESET}  Maven 2 layout\n"
+  printf "    ${CYAN}/healthz${RESET}          ${GRAY}→${RESET}  liveness probe\n"
+  printf "    ${CYAN}/readyz${RESET}           ${GRAY}→${RESET}  readiness probe\n"
+  printf "    ${CYAN}/version${RESET}          ${GRAY}→${RESET}  build info\n\n"
+  printf "${BOLD}    CLI komutları${RESET}\n\n"
+  printf "    ${WHITE}packrune serve${RESET}                          ${GRAY}HTTP server${RESET}\n"
+  printf "    ${WHITE}packrune users add ...${RESET}                  ${GRAY}kullanıcı oluştur${RESET}\n"
+  printf "    ${WHITE}packrune backup --output FILE${RESET}           ${GRAY}snapshot${RESET}\n"
+  printf "    ${WHITE}packrune restore --input FILE${RESET}           ${GRAY}geri yükle${RESET}\n"
+  printf "    ${WHITE}packrune gc [--dry-run]${RESET}                 ${GRAY}orphan blob temizliği${RESET}\n"
+  printf "    ${WHITE}packrune doctor${RESET}                         ${GRAY}diagnostic${RESET}\n"
+}
+
+op_git_status() {
+  has_cmd git || { err "git yok"; return; }
+  printf "${BOLD}    Branch / dosya durumu${RESET}\n\n"
+  git status -sb
+  echo
+  printf "${BOLD}    Son 10 commit${RESET}\n\n"
+  git log --oneline -10
+  echo
+  printf "${BOLD}    PHASES.md ilerlemesi${RESET}\n\n"
+  if [ -f PHASES.md ]; then
+    awk '/^\s*-\s\[[ x]\]/{if(/\[x\]/)x++;else o++} END{
+      printf "    %d done · %d pending · %.1f%% complete\n", x, o, (x*100)/(x+o)
+    }' PHASES.md
+  fi
+}
+
+op_stop_background() {
+  if [ -f /tmp/packrune-srv.pid ]; then
+    local pid
+    pid=$(cat /tmp/packrune-srv.pid)
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -TERM "$pid"
+      ok "Arka plan backend (PID $pid) durduruldu."
+    fi
+    rm -f /tmp/packrune-srv.pid
+  fi
+  if port_in_use 8080; then warn ":8080 hala dolu — başka bir process tutuyor olabilir"; fi
+}
+
+# ─── menu ───────────────────────────────────────────────────────────────────
+print_menu() {
+  printf "    ${BOLD}${PURPLE}Setup${RESET}\n"
+  printf "      ${GREEN} 1${RESET}  Doctor (diagnostic)\n"
+  printf "      ${GREEN} 2${RESET}  İlk kurulum  ${GRAY}(deps + build + admin)${RESET}\n\n"
+
+  printf "    ${BOLD}${PURPLE}Build${RESET}\n"
+  printf "      ${GREEN} 3${RESET}  Build all  ${GRAY}(frontend + backend)${RESET}\n"
+  printf "      ${GREEN} 4${RESET}  Build backend\n"
+  printf "      ${GREEN} 5${RESET}  Build frontend\n"
+  printf "      ${GREEN} 6${RESET}  Clean artifacts\n\n"
+
+  printf "    ${BOLD}${PURPLE}Run${RESET}\n"
+  printf "      ${GREEN} 7${RESET}  ${BOLD}Full run${RESET}  ${GRAY}(build + serve + endpoint listesi)${RESET}\n"
+  printf "      ${GREEN} 8${RESET}  Backend only  ${GRAY}(./bin/packrune)${RESET}\n"
+  printf "      ${GREEN} 9${RESET}  Frontend dev  ${GRAY}(vite :5173)${RESET}\n"
+  printf "      ${GREEN}10${RESET}  Backend (bg) + Frontend dev\n"
+  printf "      ${GREEN}11${RESET}  Stop background backend\n\n"
+
+  printf "    ${BOLD}${PURPLE}Test & QA${RESET}\n"
+  printf "      ${GREEN}12${RESET}  Run tests  ${GRAY}(-race)${RESET}\n"
+  printf "      ${GREEN}13${RESET}  Lint\n"
+  printf "      ${GREEN}14${RESET}  SPDX header check\n\n"
+
+  printf "    ${BOLD}${PURPLE}Docker${RESET}\n"
+  printf "      ${GREEN}15${RESET}  Build image  ${GRAY}(packrune:dev)${RESET}\n"
+  printf "      ${GREEN}16${RESET}  docker compose up -d\n"
+  printf "      ${GREEN}17${RESET}  docker compose down\n"
+  printf "      ${GREEN}18${RESET}  docker compose logs -f\n\n"
+
+  printf "    ${BOLD}${PURPLE}Admin${RESET}\n"
+  printf "      ${GREEN}19${RESET}  Add user\n"
+  printf "      ${GREEN}20${RESET}  Backup\n"
+  printf "      ${GREEN}21${RESET}  Restore\n"
+  printf "      ${GREEN}22${RESET}  GC orphan blobs\n\n"
+
+  printf "    ${BOLD}${PURPLE}Helpers${RESET}\n"
+  printf "      ${GREEN}23${RESET}  Open UI in browser\n"
+  printf "      ${GREEN}24${RESET}  Show all endpoints + CLI cheatsheet\n"
+  printf "      ${GREEN}25${RESET}  Git status / PHASES progress\n\n"
+
+  printf "      ${RED} 0${RESET}  Quit\n"
+}
+
+dispatch() {
+  local c="$1"
+  case "$c" in
+    1|doctor)        op_doctor ;;
+    2|init|setup)    op_first_setup ;;
+    3|build|build-all) op_build_all ;;
+    4|backend-build) op_build_backend ;;
+    5|frontend-build)op_build_frontend ;;
+    6|clean)         op_clean ;;
+    7|full|run|start) op_full_run ;;
+    8|backend)       op_run_backend ;;
+    9|frontend|dev)  op_run_frontend ;;
+    10|both)         op_run_both ;;
+    11|stop)         op_stop_background ;;
+    12|test)         op_test ;;
+    13|lint)         op_lint ;;
+    14|spdx)         op_spdx ;;
+    15|docker-build) op_docker_build ;;
+    16|docker-up|up) op_docker_up ;;
+    17|docker-down|down) op_docker_down ;;
+    18|logs)         op_docker_logs ;;
+    19|adduser|user) op_add_user ;;
+    20|backup)       op_backup ;;
+    21|restore)      op_restore ;;
+    22|gc)           op_gc ;;
+    23|open|ui)      op_open_ui ;;
+    24|endpoints)    op_show_endpoints ;;
+    25|git|status)   op_git_status ;;
+    0|q|Q|quit|exit) printf "\n  ${PINK}görüşürüz paşam ✨${RESET}\n\n"; exit 0 ;;
+    *)               err "Geçersiz seçim: $c" ;;
+  esac
+}
+
+main() {
+  if [ $# -gt 0 ]; then
+    print_banner
+    dispatch "$1"
+    exit $?
+  fi
+  while true; do
+    print_banner
+    print_menu
+    printf "\n    ${YELLOW}Seçim ›${RESET} "
+    IFS= read -r choice || { echo; exit 0; }
+    if [ -z "$choice" ]; then continue; fi
+    echo
+    dispatch "$choice"
+    press_enter
+  done
+}
+
+main "$@"
