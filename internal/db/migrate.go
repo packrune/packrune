@@ -182,4 +182,3 @@ func stripMigrationsTableCreate(sql string) string {
 	}
 	return sql[:idx] + sql[idx+end+1:]
 }
-

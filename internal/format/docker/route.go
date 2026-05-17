@@ -15,14 +15,14 @@ import "strings"
 type routeKind int
 
 const (
-	routeUnknown routeKind = iota
-	routeVersion           // GET /v2/
-	routeCatalog           // GET /v2/_catalog
-	routeTagsList          // GET /v2/<name>/tags/list
-	routeManifest          // GET|HEAD|PUT|DELETE /v2/<name>/manifests/<reference>
-	routeBlob              // GET|HEAD|DELETE /v2/<name>/blobs/<digest>
-	routeUploadStart       // POST /v2/<name>/blobs/uploads/
-	routeUploadSession     // GET|PATCH|PUT|DELETE /v2/<name>/blobs/uploads/<uuid>
+	routeUnknown       routeKind = iota
+	routeVersion                 // GET /v2/
+	routeCatalog                 // GET /v2/_catalog
+	routeTagsList                // GET /v2/<name>/tags/list
+	routeManifest                // GET|HEAD|PUT|DELETE /v2/<name>/manifests/<reference>
+	routeBlob                    // GET|HEAD|DELETE /v2/<name>/blobs/<digest>
+	routeUploadStart             // POST /v2/<name>/blobs/uploads/
+	routeUploadSession           // GET|PATCH|PUT|DELETE /v2/<name>/blobs/uploads/<uuid>
 )
 
 // parsedRoute is the structured result of parsing a registry URL path.

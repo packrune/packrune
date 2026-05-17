@@ -4,7 +4,7 @@
 // Package npm implements the npm registry HTTP API on top of Packrune's
 // storage and metadata layers. Clients point their npm config at
 //
-//   npm config set registry http://your-packrune-host/npm/
+//	npm config set registry http://your-packrune-host/npm/
 //
 // and `npm install` / `npm publish` work as if it were registry.npmjs.org.
 //

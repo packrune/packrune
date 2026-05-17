@@ -134,8 +134,8 @@ func TestHelm_UploadAndIndex(t *testing.T) {
 	var idx struct {
 		APIVersion string `yaml:"apiVersion"`
 		Entries    map[string][]struct {
-			Name    string `yaml:"name"`
-			Version string `yaml:"version"`
+			Name    string   `yaml:"name"`
+			Version string   `yaml:"version"`
 			URLs    []string `yaml:"urls"`
 		} `yaml:"entries"`
 	}

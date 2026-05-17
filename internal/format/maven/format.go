@@ -4,10 +4,10 @@
 // Package maven implements a Maven 2 repository compatible with the `mvn`
 // CLI. Clients use it via:
 //
-//   <repository>
-//     <id>packrune</id>
-//     <url>http://your-packrune-host/maven/</url>
-//   </repository>
+//	<repository>
+//	  <id>packrune</id>
+//	  <url>http://your-packrune-host/maven/</url>
+//	</repository>
 //
 // The Maven layout is documented at
 // https://maven.apache.org/repository/layout.html. We accept arbitrary PUTs

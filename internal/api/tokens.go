@@ -60,10 +60,10 @@ func (a *API) handleListTokens(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleCreateToken(w http.ResponseWriter, r *http.Request) {
 	me := userFrom(r.Context())
 	var req struct {
-		Name      string   `json:"name"`
-		Scopes    []string `json:"scopes"`
-		TTLHours  int      `json:"ttl_hours"`
-		UserID    string   `json:"user_id"`
+		Name     string   `json:"name"`
+		Scopes   []string `json:"scopes"`
+		TTLHours int      `json:"ttl_hours"`
+		UserID   string   `json:"user_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid body")

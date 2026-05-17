@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
@@ -282,11 +281,3 @@ func validateName(name string) error {
 	return nil
 }
 
-// parseContentLength is here so tests can inject sizes; production code uses
-// the standard library directly.
-func parseContentLength(s string) (int64, error) {
-	if s == "" {
-		return 0, nil
-	}
-	return strconv.ParseInt(s, 10, 64)
-}

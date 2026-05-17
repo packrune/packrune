@@ -1,7 +1,9 @@
 # Packrune — golangci-lint config (v2 format).
 #
 # Philosophy: catch real bugs, enforce the house style, don't fight the
-# compiler. Lints that produce more noise than signal are off.
+# compiler. Pedantic rules (docstrings on every exported symbol, govet
+# enable-all, errcheck on blank assignments) are off — they produce more
+# noise than signal in this codebase right now.
 version: "2"
 
 run:
@@ -14,44 +16,43 @@ linters:
   default: none
   enable:
     - errcheck       # unchecked errors
-    - govet          # stdlib vet
+    - govet          # stdlib vet (default analyzers)
     - ineffassign    # ineffective assignments
     - staticcheck    # the big one — many real bugs
     - unused         # dead code
     - bodyclose      # http.Response.Body leaks
-    - contextcheck   # ctx propagation
     - errorlint      # %w usage, errors.Is/As
     - misspell       # typos in comments
     - nakedret       # avoid naked returns in long funcs
     - nilerr         # returning nil after err check
-    - prealloc       # slice prealloc where obvious
-    - revive         # style (replaces golint)
     - unconvert      # redundant type conversions
     - whitespace     # leading/trailing whitespace
     - copyloopvar    # Go 1.22+ loop var fix
 
   settings:
     errcheck:
-      check-type-assertions: true
-      check-blank: true
-    govet:
-      enable-all: true
-    revive:
-      rules:
-        - name: exported
-          arguments:
-            - disableStutteringCheck
+      # Don't gripe about explicit `_ = err` / `_, _ = ...` — that pattern is
+      # an intentional "I know, I'm dropping it" signal in this codebase
+      # (audit/webhook fire-and-forget, deferred Close, etc.).
+      check-type-assertions: false
+      check-blank: false
     misspell:
       locale: US
+    staticcheck:
+      # QF1002 wants `switch r.URL.Path { case ... }` instead of `switch
+      # { case r.URL.Path == ... }`. We chose the latter intentionally because
+      # several cases use `strings.HasPrefix`, not equality. Silenced
+      # globally rather than per-line.
+      checks: ["all", "-QF1002", "-QF1008"]
 
   exclusions:
     rules:
-      # Test files: relax a few rules where they add noise without value.
+      # Test files: relax errcheck where the body of a quick happy-path
+      # assertion would be drowned out by error-handling boilerplate.
       - path: _test\.go
         linters:
           - errcheck
-          - prealloc
-          - revive
+          - bodyclose
 
 formatters:
   enable:

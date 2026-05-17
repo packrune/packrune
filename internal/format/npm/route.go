@@ -11,20 +11,20 @@ import "strings"
 type routeKind int
 
 const (
-	routeUnknown routeKind = iota
-	routeRoot              // GET /
-	routePing              // GET /-/ping
-	routeWhoami            // GET /-/whoami
-	routeSearch            // GET /-/v1/search
-	routePackument         // GET|PUT /<pkg>
-	routeVersion           // GET /<pkg>/<version>
-	routeTarball           // GET /<pkg>/-/<filename>
+	routeUnknown   routeKind = iota
+	routeRoot                // GET /
+	routePing                // GET /-/ping
+	routeWhoami              // GET /-/whoami
+	routeSearch              // GET /-/v1/search
+	routePackument           // GET|PUT /<pkg>
+	routeVersion             // GET /<pkg>/<version>
+	routeTarball             // GET /<pkg>/-/<filename>
 )
 
 type parsedRoute struct {
-	kind    routeKind
-	pkg     string // package name; may include "@scope/"
-	ref     string // version for routeVersion, filename for routeTarball
+	kind routeKind
+	pkg  string // package name; may include "@scope/"
+	ref  string // version for routeVersion, filename for routeTarball
 }
 
 func parsePath(p string) parsedRoute {

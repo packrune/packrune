@@ -16,16 +16,16 @@ import (
 type errorCode string
 
 const (
-	errCodeBlobUnknown      errorCode = "BLOB_UNKNOWN"
-	errCodeManifestUnknown  errorCode = "MANIFEST_UNKNOWN"
-	errCodeManifestInvalid  errorCode = "MANIFEST_INVALID"
-	errCodeNameUnknown      errorCode = "NAME_UNKNOWN"
-	errCodeNameInvalid      errorCode = "NAME_INVALID"
-	errCodeDigestInvalid    errorCode = "DIGEST_INVALID"
+	errCodeBlobUnknown       errorCode = "BLOB_UNKNOWN"
+	errCodeManifestUnknown   errorCode = "MANIFEST_UNKNOWN"
+	errCodeManifestInvalid   errorCode = "MANIFEST_INVALID"
+	errCodeNameUnknown       errorCode = "NAME_UNKNOWN"
+	errCodeNameInvalid       errorCode = "NAME_INVALID"
+	errCodeDigestInvalid     errorCode = "DIGEST_INVALID"
 	errCodeBlobUploadUnknown errorCode = "BLOB_UPLOAD_UNKNOWN"
-	errCodeUnauthorized     errorCode = "UNAUTHORIZED"
-	errCodeDenied           errorCode = "DENIED"
-	errCodeUnsupported      errorCode = "UNSUPPORTED"
+	errCodeUnauthorized      errorCode = "UNAUTHORIZED"
+	errCodeDenied            errorCode = "DENIED"
+	errCodeUnsupported       errorCode = "UNSUPPORTED"
 )
 
 type errorBody struct {

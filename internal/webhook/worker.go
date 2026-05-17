@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	maxAttempts   = 6
-	pollInterval  = 30 * time.Second
+	maxAttempts     = 6
+	pollInterval    = 30 * time.Second
 	deliveryTimeout = 15 * time.Second
 )
 

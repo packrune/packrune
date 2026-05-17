@@ -103,9 +103,9 @@ func LogRequests(logger *slog.Logger) func(http.Handler) http.Handler {
 // status code and byte count after the handler returns.
 type statusRecorder struct {
 	http.ResponseWriter
-	status     int
-	written    int
-	wroteHead  bool
+	status    int
+	written   int
+	wroteHead bool
 }
 
 func (s *statusRecorder) WriteHeader(code int) {

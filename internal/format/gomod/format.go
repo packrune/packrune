@@ -4,7 +4,7 @@
 // Package gomod implements the Go module proxy protocol on top of Packrune's
 // storage and metadata. Clients use it with:
 //
-//   GOPROXY=http://your-packrune-host/go,direct
+//	GOPROXY=http://your-packrune-host/go,direct
 //
 // We accept module version uploads via a small PUT API so operators can push
 // module contents from CI without depending on git; standard `go get` then

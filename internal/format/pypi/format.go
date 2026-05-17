@@ -4,8 +4,8 @@
 // Package pypi implements a Python Package Index compatible with `pip` and
 // `twine`. Clients use it via:
 //
-//   pip install --index-url http://your-packrune-host/pypi/simple/  somepkg
-//   twine upload --repository-url http://your-packrune-host/pypi/  dist/*
+//	pip install --index-url http://your-packrune-host/pypi/simple/  somepkg
+//	twine upload --repository-url http://your-packrune-host/pypi/  dist/*
 //
 // The simple index follows PEP 503 (HTML) and PEP 691 (JSON). Uploads use the
 // twine multipart form convention.

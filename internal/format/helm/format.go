@@ -4,7 +4,7 @@
 // Package helm implements a Helm Chart Repository at /helm. Clients add the
 // repo with
 //
-//   helm repo add packrune http://your-packrune-host/helm/
+//	helm repo add packrune http://your-packrune-host/helm/
 //
 // and `helm install` works against it. Uploads use the chartmuseum-style
 // POST /api/charts multipart endpoint that the popular `helm cm-push` plugin

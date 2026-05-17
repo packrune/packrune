@@ -15,7 +15,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"syscall"
 
 	"golang.org/x/term"
 
@@ -171,9 +170,13 @@ func runUsersAdd(args []string) error {
 }
 
 func promptPassword() (string, error) {
-	if term.IsTerminal(int(syscall.Stdin)) {
+	// os.Stdin.Fd() is uintptr on every platform; cast to int for x/term.
+	// On Windows syscall.Stdin is a Handle (uintptr), so going through
+	// os.Stdin.Fd() keeps this portable.
+	fd := int(os.Stdin.Fd())
+	if term.IsTerminal(fd) {
 		fmt.Print("Password: ")
-		b, err := term.ReadPassword(int(syscall.Stdin))
+		b, err := term.ReadPassword(fd)
 		fmt.Println()
 		if err != nil {
 			return "", fmt.Errorf("read password: %w", err)

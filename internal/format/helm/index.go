@@ -18,10 +18,10 @@ import (
 )
 
 type helmIndex struct {
-	APIVersion string                       `yaml:"apiVersion"`
-	Entries    map[string][]helmIndexEntry  `yaml:"entries"`
-	Generated  string                       `yaml:"generated"`
-	ServerInfo helmServerInfo               `yaml:"serverInfo,omitempty"`
+	APIVersion string                      `yaml:"apiVersion"`
+	Entries    map[string][]helmIndexEntry `yaml:"entries"`
+	Generated  string                      `yaml:"generated"`
+	ServerInfo helmServerInfo              `yaml:"serverInfo,omitempty"`
 }
 
 type helmIndexEntry struct {

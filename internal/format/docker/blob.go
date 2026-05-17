@@ -27,14 +27,10 @@ func (h *Handler) handleBlob(w http.ResponseWriter, r *http.Request, name, diges
 		return
 	}
 
-	// Check the artifact mapping so we 404 cleanly for blobs that physically
-	// exist but were never associated with this repo (de-dup safety).
-	_, err := h.store.GetArtifact(r.Context(), h.repoID, "refs/"+name+"/blobs/"+digest)
-	if err != nil {
-		// Fall through to a direct CAS check if we didn't track it under this
-		// image name. Many docker clients re-pull a layer that exists at the
-		// blob level but lacks a name binding (cross-repo mount, etc.).
-	}
+	// We don't gate on the per-image artifact binding here: many docker
+	// clients re-pull a layer whose blob lives in CAS but whose name
+	// binding under this repo was never written (cross-repo mount, dedup,
+	// etc.). The CAS lookup below is the source of truth.
 
 	switch r.Method {
 	case http.MethodHead:
