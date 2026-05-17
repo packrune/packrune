@@ -22,6 +22,8 @@ import (
 
 type ProxyConfig struct {
 	Upstream string `json:"upstream"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 func ParseProxyConfig(raw []byte) ProxyConfig {
@@ -46,6 +48,9 @@ func (h *Handler) proxyFetchFile(ctx context.Context, path string) ([]byte, erro
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
+	}
+	if h.proxy.Username != "" {
+		req.SetBasicAuth(h.proxy.Username, h.proxy.Password)
 	}
 	resp, err := proxyClient.Do(req)
 	if err != nil {

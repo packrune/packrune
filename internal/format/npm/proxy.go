@@ -19,9 +19,11 @@ import (
 )
 
 // ProxyConfig is parsed from repository.Config JSON. Empty Upstream means
-// no proxy.
+// no proxy. Username/Password, when set, are sent as HTTP Basic auth.
 type ProxyConfig struct {
 	Upstream string `json:"upstream"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 func ParseProxyConfig(raw []byte) ProxyConfig {
@@ -45,6 +47,9 @@ func (h *Handler) proxyFetchPackument(ctx context.Context, pkg string) ([]byte, 
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json")
+	if h.proxy.Username != "" {
+		req.SetBasicAuth(h.proxy.Username, h.proxy.Password)
+	}
 	resp, err := proxyClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -78,6 +83,9 @@ func (h *Handler) proxyFetchTarball(ctx context.Context, pkg, filename string) (
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
+	}
+	if h.proxy.Username != "" {
+		req.SetBasicAuth(h.proxy.Username, h.proxy.Password)
 	}
 	resp, err := proxyClient.Do(req)
 	if err != nil {

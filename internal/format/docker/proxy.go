@@ -24,9 +24,14 @@ import (
 )
 
 // ProxyConfig is parsed from a repository's stored Config JSON. An empty
-// Upstream disables proxy behavior.
+// Upstream disables proxy behavior. Username/Password, when set, are sent
+// as HTTP Basic auth (sufficient for ghcr.io with a PAT and most
+// enterprise registries; Docker Hub's full bearer-token negotiation is
+// deferred).
 type ProxyConfig struct {
 	Upstream string `json:"upstream"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 // ParseProxyConfig extracts ProxyConfig from a repository's Config JSON.
@@ -58,6 +63,9 @@ func (h *Handler) proxyFetch(ctx context.Context, urlPath string, accept []strin
 	}
 	for _, a := range accept {
 		req.Header.Add("Accept", a)
+	}
+	if h.proxy.Username != "" {
+		req.SetBasicAuth(h.proxy.Username, h.proxy.Password)
 	}
 	resp, err := proxyClient.Do(req)
 	if err != nil {

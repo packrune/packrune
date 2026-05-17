@@ -19,9 +19,12 @@ import (
 	"time"
 )
 
-// ProxyConfig is parsed from a Repository's stored Config JSON.
+// ProxyConfig is parsed from a Repository's stored Config JSON. Username
+// and Password are passed as HTTP Basic when present.
 type ProxyConfig struct {
 	Upstream string `json:"upstream"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 func ParseProxyConfig(raw []byte) ProxyConfig {
@@ -45,6 +48,9 @@ func (h *Handler) proxyFetchChart(ctx context.Context, filename string) ([]byte,
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
+	}
+	if h.proxy.Username != "" {
+		req.SetBasicAuth(h.proxy.Username, h.proxy.Password)
 	}
 	resp, err := proxyClient.Do(req)
 	if err != nil {
