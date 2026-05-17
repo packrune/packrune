@@ -4,6 +4,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 
+import { CommandPalette } from "./components/CommandPalette";
 import { ThemeProvider } from "./themes/ThemeProvider";
 import { router } from "./router";
 import "./i18n";
@@ -23,6 +24,7 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <RouterProvider router={router} />
+        <CommandPalette />
       </ThemeProvider>
     </QueryClientProvider>
   );

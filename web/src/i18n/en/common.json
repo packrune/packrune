@@ -109,6 +109,12 @@
     "noScopes": "no scopes",
     "empty": "You have no tokens yet."
   },
+  "palette": {
+    "placeholder": "Jump to a page or repository…",
+    "empty": "No matches.",
+    "kindPage": "Page",
+    "kindAction": "Action"
+  },
   "theme": {
     "label": "Theme",
     "aurora": "Aurora",

@@ -106,6 +106,12 @@
     "noScopes": "kapsam yok",
     "empty": "Henüz anahtarın yok."
   },
+  "palette": {
+    "placeholder": "Sayfa veya depoya atla…",
+    "empty": "Eşleşme yok.",
+    "kindPage": "Sayfa",
+    "kindAction": "Eylem"
+  },
   "theme": {
     "label": "Tema",
     "aurora": "Aurora",
