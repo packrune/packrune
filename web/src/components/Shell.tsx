@@ -54,6 +54,7 @@ function Sidebar() {
     { icon: Users, label: t("nav.users"), to: "/users" },
     { icon: Radio, label: t("nav.webhooks"), to: "/webhooks" },
     { icon: History, label: t("nav.audit"), to: "/audit" },
+    { icon: SettingsIcon, label: t("nav.settings"), to: "/settings" },
   ];
   const items = me.data?.is_admin ? [...baseItems, ...adminItems] : baseItems;
   return (

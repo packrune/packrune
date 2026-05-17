@@ -25,6 +25,36 @@ func (a *API) handleSystemVersion(w http.ResponseWriter, _ *http.Request) {
 	})
 }
 
+// handleSystemConfig returns a sanitized view of the active configuration
+// (admin-only). Secret fields are redacted.
+func (a *API) handleSystemConfig(w http.ResponseWriter, r *http.Request) {
+	me := userFrom(r.Context())
+	if !me.IsAdmin {
+		writeError(w, http.StatusForbidden, "admin required")
+		return
+	}
+	if a.Config == nil {
+		writeError(w, http.StatusServiceUnavailable, "config not wired")
+		return
+	}
+	c := *a.Config
+	// Redact anything that could be sensitive.
+	c.Auth.TokenSecret = redact(c.Auth.TokenSecret)
+	c.Storage.S3.SecretKey = redact(c.Storage.S3.SecretKey)
+	c.Database.DSN = redact(c.Database.DSN)
+	writeJSON(w, http.StatusOK, c)
+}
+
+func redact(s string) string {
+	if s == "" {
+		return ""
+	}
+	if len(s) <= 8 {
+		return "[redacted]"
+	}
+	return s[:4] + "…" + "[redacted]"
+}
+
 func (a *API) handleSystemStats(w http.ResponseWriter, r *http.Request) {
 	rs, err := a.Store.List(r.Context())
 	if err != nil {

@@ -127,6 +127,26 @@
     "subtitle": "Hesap ve görünüm tercihlerin.",
     "appearance": "Görünüm"
   },
+  "settings": {
+    "title": "Sistem ayarları",
+    "subtitle": "Aktif yapılandırmanın salt okunur görünümü. Değiştirmek için packrune.yaml düzenle veya PACKRUNE_* env var'larını ayarla.",
+    "server": "Sunucu",
+    "database": "Veritabanı",
+    "storage": "Depolama",
+    "auth": "Kimlik doğrulama",
+    "log": "Loglama",
+    "addr": "Dinleme adresi",
+    "externalUrl": "Harici URL",
+    "driver": "Sürücü",
+    "backend": "Backend",
+    "root": "Kök",
+    "sessionTTL": "Oturum TTL",
+    "allowSignup": "Kayıda izin ver",
+    "level": "Seviye",
+    "format": "Biçim",
+    "editHint": "Sunucuda packrune.yaml düzenle veya PACKRUNE_<BÖLÜM>_<ANAHTAR> env var'ı ayarla, sonra yeniden başlat.",
+    "adminOnly": "Admin yetkisi gerekir."
+  },
   "palette": {
     "placeholder": "Sayfa veya depoya atla…",
     "empty": "Eşleşme yok.",

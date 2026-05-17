@@ -187,6 +187,7 @@ func runServe(args []string) error {
 	webhookSvc := webhook.New(database, logger)
 	auditReader := audit.NewReader(database)
 	auditWriter := audit.NewWriter(database)
+	cfgCopy := cfg
 	jsonAPI := &api.API{
 		Logger:      logger,
 		Auth:        authSvc,
@@ -194,6 +195,7 @@ func runServe(args []string) error {
 		Webhooks:    webhookSvc,
 		Audit:       auditReader,
 		AuditWriter: auditWriter,
+		Config:      &cfgCopy,
 		Version:     version, Commit: commit, Date: date,
 	}
 	srv.Router().Mount("/api", jsonAPI.Router())

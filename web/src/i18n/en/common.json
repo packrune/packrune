@@ -130,6 +130,26 @@
     "subtitle": "Your account and appearance preferences.",
     "appearance": "Appearance"
   },
+  "settings": {
+    "title": "System settings",
+    "subtitle": "Read-only view of the active configuration. Edit packrune.yaml or set PACKRUNE_* env vars to change.",
+    "server": "Server",
+    "database": "Database",
+    "storage": "Storage",
+    "auth": "Auth",
+    "log": "Logging",
+    "addr": "Listen address",
+    "externalUrl": "External URL",
+    "driver": "Driver",
+    "backend": "Backend",
+    "root": "Root",
+    "sessionTTL": "Session TTL",
+    "allowSignup": "Allow signup",
+    "level": "Level",
+    "format": "Format",
+    "editHint": "Edit packrune.yaml on the server or set PACKRUNE_<SECTION>_<KEY> env vars, then restart.",
+    "adminOnly": "Admin role required."
+  },
   "palette": {
     "placeholder": "Jump to a page or repository…",
     "empty": "No matches.",

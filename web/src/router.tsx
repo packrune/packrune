@@ -14,6 +14,7 @@ import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
 import { ProfilePage } from "./pages/ProfilePage";
 import { RepositoriesPage } from "./pages/RepositoriesPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { RepositoryDetail } from "./pages/RepositoryDetail";
 import { TokensPage } from "./pages/TokensPage";
 import { UsersPage } from "./pages/UsersPage";
@@ -83,6 +84,12 @@ const profileRoute = createRoute({
   component: ProfilePage,
 });
 
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings",
+  component: SettingsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   landingRoute,
   loginRoute,
@@ -94,6 +101,7 @@ const routeTree = rootRoute.addChildren([
   usersRoute,
   webhooksRoute,
   profileRoute,
+  settingsRoute,
 ]);
 
 export const router = createRouter({ routeTree });

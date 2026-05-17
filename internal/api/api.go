@@ -20,6 +20,7 @@ import (
 
 	"github.com/packrune/packrune/internal/audit"
 	"github.com/packrune/packrune/internal/auth"
+	"github.com/packrune/packrune/internal/config"
 	"github.com/packrune/packrune/internal/repo"
 	"github.com/packrune/packrune/internal/webhook"
 )
@@ -32,6 +33,7 @@ type API struct {
 	Webhooks    *webhook.Service
 	Audit       *audit.Reader
 	AuditWriter *audit.Writer
+	Config      *config.Config
 
 	Version string
 	Commit  string
@@ -54,6 +56,7 @@ func (a *API) Router() chi.Router {
 		r.Get("/repositories/{name}/{format}/artifacts", a.handleListRepositoryArtifacts)
 		r.Get("/formats", a.handleListFormats)
 		r.Get("/system/stats", a.handleSystemStats)
+		r.Get("/system/config", a.handleSystemConfig)
 
 		// Token self-service (admin can manage other users' tokens via
 		// ?user_id=).
