@@ -98,7 +98,8 @@ and it gets us "useful" the fastest.
 - [x] Go-level integration tests (handshake, blob round-trip, manifest+tag list)
 - [x] curl-level smoke test (push blob → pull blob → push manifest → list tags → catalog)
 - [ ] Token auth flow (`/v2/token`, scope grant) — Faz 2 polish
-- [ ] Garbage collection job (orphan blobs) — Faz 2 polish
+- [x] Garbage collection (`packrune gc [--dry-run]` sweeps CAS for blobs
+      with no artifact rows pointing at them; reports scanned/freed bytes)
 - [ ] OCI distribution spec conformance suite run in CI — Faz 2 polish
 - [ ] HTTPS / TLS support for real `docker push` from CLI without
       `--insecure-registry` — Faz 12

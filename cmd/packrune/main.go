@@ -51,6 +51,8 @@ func dispatch(args []string) error {
 		return runBackup(args[1:])
 	case "restore":
 		return runRestore(args[1:])
+	case "gc":
+		return runGC(args[1:])
 	default:
 		// Treat unknown leading args as flags to the default serve command.
 		// `packrune --config foo.yaml` should still work.
@@ -79,6 +81,7 @@ Usage:
                                         create a user (prompts for password)
   packrune backup [--output FILE]       snapshot SQLite + fs storage to .tar.gz
   packrune restore --input FILE         restore from a backup (use --force to overwrite)
+  packrune gc [--dry-run]               sweep orphan CAS blobs
   packrune --version                    print version
   packrune --help                       this message
 
