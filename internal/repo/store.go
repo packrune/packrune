@@ -10,6 +10,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -122,6 +123,111 @@ func (s *Store) UpsertArtifact(ctx context.Context, repoID, path, digest string,
 		return fmt.Errorf("repo: upsert artifact: %w", err)
 	}
 	return nil
+}
+
+// GetByID returns a repository by its primary key.
+func (s *Store) GetByID(ctx context.Context, id string) (Repository, error) {
+	var r Repository
+	var kind string
+	q := s.db.Rebind(`SELECT id, name, format, kind, config, created_at, updated_at
+		FROM repositories WHERE id = ? LIMIT 1`)
+	err := s.db.QueryRowContext(ctx, q, id).Scan(
+		&r.ID, &r.Name, &r.Format, &kind, &r.Config, &r.CreatedAt, &r.UpdatedAt,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return Repository{}, ErrNotFound
+	}
+	if err != nil {
+		return Repository{}, fmt.Errorf("repo: get by id: %w", err)
+	}
+	r.Kind = Kind(kind)
+	return r, nil
+}
+
+// groupConfig is the JSON shape of a group repository's Config field.
+type groupConfig struct {
+	Members []string `json:"members"`
+}
+
+// ResolveArtifact returns the artifact at (repo, path). If the repo is a
+// group, walks its configured member repos in order and returns the first
+// hit (same format only). Hosted/proxy repos behave like GetArtifact.
+func (s *Store) ResolveArtifact(ctx context.Context, repoID, path string) (Artifact, error) {
+	if art, err := s.GetArtifact(ctx, repoID, path); err == nil {
+		return art, nil
+	} else if !errors.Is(err, ErrNotFound) {
+		return Artifact{}, err
+	}
+
+	parent, err := s.GetByID(ctx, repoID)
+	if err != nil {
+		return Artifact{}, err
+	}
+	if parent.Kind != KindGroup {
+		return Artifact{}, ErrNotFound
+	}
+	var gc groupConfig
+	if len(parent.Config) > 0 {
+		_ = json.Unmarshal(parent.Config, &gc)
+	}
+	for _, name := range gc.Members {
+		member, err := s.Get(ctx, name, parent.Format)
+		if err != nil {
+			continue
+		}
+		art, err := s.GetArtifact(ctx, member.ID, path)
+		if err == nil {
+			return art, nil
+		}
+	}
+	return Artifact{}, ErrNotFound
+}
+
+// ResolveArtifactsByPrefix combines the direct list with each member's
+// list when the repo is a group. Duplicates (by path) are de-duplicated
+// keeping the first occurrence — direct entries shadow members, earlier
+// members shadow later ones.
+func (s *Store) ResolveArtifactsByPrefix(ctx context.Context, repoID, prefix string) ([]Artifact, error) {
+	direct, err := s.ListArtifactsByPrefix(ctx, repoID, prefix)
+	if err != nil {
+		return nil, err
+	}
+
+	parent, err := s.GetByID(ctx, repoID)
+	if err != nil {
+		return direct, nil
+	}
+	if parent.Kind != KindGroup {
+		return direct, nil
+	}
+	var gc groupConfig
+	if len(parent.Config) > 0 {
+		_ = json.Unmarshal(parent.Config, &gc)
+	}
+
+	seen := map[string]bool{}
+	combined := make([]Artifact, 0, len(direct))
+	for _, a := range direct {
+		seen[a.Path] = true
+		combined = append(combined, a)
+	}
+	for _, name := range gc.Members {
+		member, err := s.Get(ctx, name, parent.Format)
+		if err != nil {
+			continue
+		}
+		items, err := s.ListArtifactsByPrefix(ctx, member.ID, prefix)
+		if err != nil {
+			continue
+		}
+		for _, a := range items {
+			if !seen[a.Path] {
+				seen[a.Path] = true
+				combined = append(combined, a)
+			}
+		}
+	}
+	return combined, nil
 }
 
 // GetArtifact returns one artifact by (repo_id, path).

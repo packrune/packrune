@@ -75,7 +75,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) serveFile(w http.ResponseWriter, r *http.Request, p string) {
-	art, err := h.store.GetArtifact(r.Context(), h.repoID, "files/"+p)
+	art, err := h.store.ResolveArtifact(r.Context(), h.repoID, "files/"+p)
 	if err != nil {
 		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
 			body, perr := h.proxyFetchFile(r.Context(), p)

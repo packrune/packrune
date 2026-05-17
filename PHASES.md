@@ -233,7 +233,10 @@ command palette, and settings/profile screens land next.
       URL rewriting to point at us)
 - [ ] Cache eviction policy (LRU + age) — deferred
 - [ ] Cache invalidation hooks — deferred
-- [ ] Group repository resolver (first-match across members) — deferred
+- [x] Group repository resolver — Store.ResolveArtifact +
+      ResolveArtifactsByPrefix walk members, first-member-wins on path
+      conflicts; every format handler's read paths use these so a single
+      group repo can fan out to N hosted/proxy members. Tested.
 - [ ] Proxy auth (upstream bearer/basic credentials) — deferred
 
 ## Faz 9 — PyPI format

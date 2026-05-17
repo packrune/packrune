@@ -85,7 +85,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleIndex(w http.ResponseWriter, r *http.Request) {
-	arts, err := h.store.ListArtifactsByPrefix(r.Context(), h.repoID, "charts/")
+	arts, err := h.store.ResolveArtifactsByPrefix(r.Context(), h.repoID, "charts/")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -102,7 +102,7 @@ func (h *Handler) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleDownload(w http.ResponseWriter, r *http.Request, filename string) {
 	// filename is "<name>-<version>.tgz"; find the artifact whose path ends with it.
-	arts, err := h.store.ListArtifactsByPrefix(r.Context(), h.repoID, "charts/")
+	arts, err := h.store.ResolveArtifactsByPrefix(r.Context(), h.repoID, "charts/")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -194,7 +194,7 @@ func (h *Handler) handleUpload(w http.ResponseWriter, r *http.Request) {
 
 // handleList: GET /api/charts — chartmuseum-compatible {name: [entry,...]}.
 func (h *Handler) handleList(w http.ResponseWriter, r *http.Request) {
-	arts, err := h.store.ListArtifactsByPrefix(r.Context(), h.repoID, "charts/")
+	arts, err := h.store.ResolveArtifactsByPrefix(r.Context(), h.repoID, "charts/")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

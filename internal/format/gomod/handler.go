@@ -95,7 +95,7 @@ func (h *Handler) handleList(w http.ResponseWriter, r *http.Request, module stri
 		return
 	}
 	prefix := "modules/" + module + "/"
-	arts, err := h.store.ListArtifactsByPrefix(r.Context(), h.repoID, prefix)
+	arts, err := h.store.ResolveArtifactsByPrefix(r.Context(), h.repoID, prefix)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -131,7 +131,7 @@ func (h *Handler) handleLatest(w http.ResponseWriter, r *http.Request, module st
 		return
 	}
 	prefix := "modules/" + module + "/"
-	arts, err := h.store.ListArtifactsByPrefix(r.Context(), h.repoID, prefix)
+	arts, err := h.store.ResolveArtifactsByPrefix(r.Context(), h.repoID, prefix)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -163,7 +163,7 @@ func (h *Handler) handleLatest(w http.ResponseWriter, r *http.Request, module st
 
 func (h *Handler) serveVersionFile(w http.ResponseWriter, r *http.Request, module, version, ext string) {
 	path := "modules/" + module + "/" + version + ext
-	art, err := h.store.GetArtifact(r.Context(), h.repoID, path)
+	art, err := h.store.ResolveArtifact(r.Context(), h.repoID, path)
 	if err != nil {
 		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
 			body, perr := h.proxyFetchVersion(r.Context(), module, version, ext)

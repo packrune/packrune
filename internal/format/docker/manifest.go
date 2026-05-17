@@ -50,7 +50,7 @@ func (h *Handler) handleManifest(w http.ResponseWriter, r *http.Request, name, r
 
 func (h *Handler) serveManifest(w http.ResponseWriter, r *http.Request, name, reference string, headOnly bool) {
 	path := manifestPath(name, reference)
-	art, err := h.store.GetArtifact(r.Context(), h.repoID, path)
+	art, err := h.store.ResolveArtifact(r.Context(), h.repoID, path)
 	if err != nil {
 		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
 			// Fetch + cache from upstream, then re-lookup.
@@ -158,7 +158,7 @@ func (h *Handler) handleTagsList(w http.ResponseWriter, r *http.Request, name st
 	}
 
 	prefix := "refs/" + name + "/manifests/"
-	arts, err := h.store.ListArtifactsByPrefix(r.Context(), h.repoID, prefix)
+	arts, err := h.store.ResolveArtifactsByPrefix(r.Context(), h.repoID, prefix)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, errCodeUnsupported, err.Error())
 		return
@@ -186,7 +186,7 @@ func (h *Handler) handleCatalog(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusMethodNotAllowed, errCodeUnsupported, "method not allowed")
 		return
 	}
-	arts, err := h.store.ListArtifactsByPrefix(r.Context(), h.repoID, "refs/")
+	arts, err := h.store.ResolveArtifactsByPrefix(r.Context(), h.repoID, "refs/")
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, errCodeUnsupported, err.Error())
 		return

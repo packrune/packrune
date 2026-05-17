@@ -113,7 +113,7 @@ func (h *Handler) handlePackument(w http.ResponseWriter, r *http.Request, pkg st
 }
 
 func (h *Handler) servePackument(w http.ResponseWriter, r *http.Request, pkg string, headOnly bool) {
-	art, err := h.store.GetArtifact(r.Context(), h.repoID, "packuments/"+pkg)
+	art, err := h.store.ResolveArtifact(r.Context(), h.repoID, "packuments/"+pkg)
 	if err != nil {
 		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
 			body, perr := h.proxyFetchPackument(r.Context(), pkg)
@@ -160,7 +160,7 @@ func (h *Handler) handleVersion(w http.ResponseWriter, r *http.Request, pkg, ver
 		return
 	}
 	// Read the packument and extract the requested version object.
-	art, err := h.store.GetArtifact(r.Context(), h.repoID, "packuments/"+pkg)
+	art, err := h.store.ResolveArtifact(r.Context(), h.repoID, "packuments/"+pkg)
 	if err != nil {
 		writeError(w, http.StatusNotFound, "package not found")
 		return
@@ -199,7 +199,7 @@ func (h *Handler) handleTarball(w http.ResponseWriter, r *http.Request, pkg, fil
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	art, err := h.store.GetArtifact(r.Context(), h.repoID, "tarballs/"+pkg+"/"+filename)
+	art, err := h.store.ResolveArtifact(r.Context(), h.repoID, "tarballs/"+pkg+"/"+filename)
 	if err != nil {
 		if errors.Is(err, repo.ErrNotFound) && h.repoKind == "proxy" {
 			body, perr := h.proxyFetchTarball(r.Context(), pkg, filename)
