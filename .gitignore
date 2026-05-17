@@ -27,6 +27,15 @@ pnpm-debug.log*
 # Generated / embedded
 /web/build-info.json
 /internal/web/embed_gen.go
+# Vite's compiled bundles land here, embedded into the Go binary at build
+# time. Only the placeholder index.html is checked in so a fresh `go build`
+# still succeeds before anyone runs `pnpm build`.
+/internal/web/dist/assets/
+/internal/web/dist/*.js
+/internal/web/dist/*.css
+/internal/web/dist/*.svg
+/internal/web/dist/*.png
+/internal/web/dist/*.map
 
 # Local dev data
 /data/
