@@ -10,7 +10,9 @@
     "users": "Users",
     "tokens": "Tokens",
     "settings": "Settings",
-    "audit": "Audit Log"
+    "audit": "Audit Log",
+    "webhooks": "Webhooks",
+    "profile": "Profile"
   },
   "actions": {
     "search": "Search",
@@ -108,6 +110,25 @@
     "revoke": "Revoke",
     "noScopes": "no scopes",
     "empty": "You have no tokens yet."
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "subtitle": "Get notified when artifacts move. Payloads carry an HMAC-SHA256 signature.",
+    "newTitle": "Add a webhook",
+    "namePlaceholder": "Name",
+    "urlPlaceholder": "https://example.com/hook",
+    "secretPlaceholder": "Shared secret (optional but recommended)",
+    "eventsPlaceholder": "Events (comma separated, e.g. artifact.created or *)",
+    "create": "Add webhook",
+    "creating": "Adding…",
+    "delete": "Remove",
+    "empty": "No webhooks configured yet.",
+    "adminOnly": "Admin role required."
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Your account and appearance preferences.",
+    "appearance": "Appearance"
   },
   "palette": {
     "placeholder": "Jump to a page or repository…",

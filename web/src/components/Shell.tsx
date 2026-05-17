@@ -11,7 +11,9 @@ import {
   Key,
   LayoutDashboard,
   LogOut,
+  Radio,
   Search,
+  Settings as SettingsIcon,
   Users,
 } from "lucide-react";
 
@@ -46,9 +48,11 @@ function Sidebar() {
     { icon: LayoutDashboard, label: t("nav.dashboard"), to: "/dashboard" },
     { icon: Boxes, label: t("nav.repositories"), to: "/repositories" },
     { icon: Key, label: t("nav.tokens"), to: "/tokens" },
+    { icon: SettingsIcon, label: t("nav.profile"), to: "/profile" },
   ];
   const adminItems = [
     { icon: Users, label: t("nav.users"), to: "/users" },
+    { icon: Radio, label: t("nav.webhooks"), to: "/webhooks" },
     { icon: History, label: t("nav.audit"), to: "/audit" },
   ];
   const items = me.data?.is_admin ? [...baseItems, ...adminItems] : baseItems;

@@ -10,7 +10,9 @@
     "users": "Kullanıcılar",
     "tokens": "Anahtarlar",
     "settings": "Ayarlar",
-    "audit": "Denetim Kaydı"
+    "audit": "Denetim Kaydı",
+    "webhooks": "Webhook'lar",
+    "profile": "Profil"
   },
   "actions": {
     "search": "Ara",
@@ -105,6 +107,25 @@
     "revoke": "İptal et",
     "noScopes": "kapsam yok",
     "empty": "Henüz anahtarın yok."
+  },
+  "webhooks": {
+    "title": "Webhook'lar",
+    "subtitle": "Artifact hareketlerinde bildirim al. Payload'lar HMAC-SHA256 ile imzalanır.",
+    "newTitle": "Webhook ekle",
+    "namePlaceholder": "İsim",
+    "urlPlaceholder": "https://example.com/hook",
+    "secretPlaceholder": "Paylaşılan anahtar (opsiyonel ama önerilir)",
+    "eventsPlaceholder": "Olaylar (virgülle ayır, örn. artifact.created veya *)",
+    "create": "Webhook ekle",
+    "creating": "Ekleniyor…",
+    "delete": "Kaldır",
+    "empty": "Henüz webhook tanımlı değil.",
+    "adminOnly": "Admin yetkisi gerekir."
+  },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Hesap ve görünüm tercihlerin.",
+    "appearance": "Görünüm"
   },
   "palette": {
     "placeholder": "Sayfa veya depoya atla…",
