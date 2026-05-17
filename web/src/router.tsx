@@ -14,6 +14,7 @@ import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
 import { RepositoriesPage } from "./pages/RepositoriesPage";
 import { TokensPage } from "./pages/TokensPage";
+import { UsersPage } from "./pages/UsersPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -55,6 +56,12 @@ const auditRoute = createRoute({
   component: AuditPage,
 });
 
+const usersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/users",
+  component: UsersPage,
+});
+
 const routeTree = rootRoute.addChildren([
   landingRoute,
   loginRoute,
@@ -62,6 +69,7 @@ const routeTree = rootRoute.addChildren([
   repositoriesRoute,
   tokensRoute,
   auditRoute,
+  usersRoute,
 ]);
 
 export const router = createRouter({ routeTree });

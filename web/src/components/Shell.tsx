@@ -3,15 +3,15 @@
 
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BookOpen,
   Boxes,
   History,
   Key,
   LayoutDashboard,
-  Package,
+  LogOut,
   Search,
-  Settings,
   Users,
 } from "lucide-react";
 
@@ -19,14 +19,11 @@ import { Glass } from "./Glass";
 import { useTheme } from "../themes/ThemeProvider";
 import { SUPPORTED_LANGUAGES, changeLanguage } from "../i18n";
 import { useTranslation as useTranslationOriginal } from "react-i18next";
+import { useLogout, useMe } from "../lib/api";
 
 /**
  * Shell wraps every authenticated page: aurora background, sidebar, topbar,
- * theme + language switchers, and the page slot. Pages just render their
- * content and Shell handles chrome.
- *
- * Today only the demo Landing page is wired; once Faz 7 lands, this Shell
- * will host the real routes.
+ * theme + language switchers, sign-out, and the page slot.
  */
 export function Shell({ children }: { children: ReactNode }) {
   return (
@@ -44,15 +41,17 @@ export function Shell({ children }: { children: ReactNode }) {
 
 function Sidebar() {
   const { t } = useTranslation();
-  const items = [
-    { icon: LayoutDashboard, label: t("nav.dashboard") },
-    { icon: Boxes, label: t("nav.repositories") },
-    { icon: Package, label: t("nav.packages") },
-    { icon: Users, label: t("nav.users") },
-    { icon: Key, label: t("nav.tokens") },
-    { icon: History, label: t("nav.audit") },
-    { icon: Settings, label: t("nav.settings") },
+  const me = useMe();
+  const baseItems = [
+    { icon: LayoutDashboard, label: t("nav.dashboard"), to: "/dashboard" },
+    { icon: Boxes, label: t("nav.repositories"), to: "/repositories" },
+    { icon: Key, label: t("nav.tokens"), to: "/tokens" },
   ];
+  const adminItems = [
+    { icon: Users, label: t("nav.users"), to: "/users" },
+    { icon: History, label: t("nav.audit"), to: "/audit" },
+  ];
+  const items = me.data?.is_admin ? [...baseItems, ...adminItems] : baseItems;
   return (
     <aside className="w-64 shrink-0 p-4">
       <Glass elevation={2} className="flex h-full flex-col gap-2 p-4">
@@ -62,18 +61,52 @@ function Sidebar() {
         </div>
         <nav className="flex flex-col gap-1">
           {items.map((it) => (
-            <button
-              key={it.label}
-              type="button"
+            <Link
+              key={it.to}
+              to={it.to}
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-[color:var(--bg-elev-2)]"
+              activeProps={{ className: "bg-[color:var(--bg-elev-2)]" }}
             >
               <it.icon size={16} className="text-[color:var(--fg-muted)]" />
               <span>{it.label}</span>
-            </button>
+            </Link>
           ))}
         </nav>
+        <div className="mt-auto pt-4">
+          <UserBadge />
+        </div>
       </Glass>
     </aside>
+  );
+}
+
+function UserBadge() {
+  const { t } = useTranslation();
+  const me = useMe();
+  const logout = useLogout();
+  const navigate = useNavigate();
+  if (!me.data) return null;
+  return (
+    <div className="flex items-center justify-between gap-2 rounded-xl bg-[color:var(--bg-elev-1)] px-3 py-2">
+      <div className="min-w-0">
+        <div className="truncate text-sm font-medium">
+          {me.data.display_name || me.data.username}
+        </div>
+        <div className="truncate text-xs text-[color:var(--fg-muted)]">{me.data.email}</div>
+      </div>
+      <button
+        type="button"
+        onClick={async () => {
+          await logout.mutateAsync();
+          navigate({ to: "/login" });
+        }}
+        className="rounded-md p-2 text-[color:var(--fg-muted)] transition-colors hover:bg-[color:var(--bg-elev-2)]"
+        aria-label={t("actions.signOut")}
+        title={t("actions.signOut")}
+      >
+        <LogOut size={14} />
+      </button>
+    </div>
   );
 }
 

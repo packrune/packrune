@@ -69,6 +69,20 @@
     "empty": "Henüz denetim kaydı yok — giriş yapıp deneyebilirsin.",
     "adminOnly": "Denetim kaydını görüntülemek için admin yetkisi gerekir."
   },
+  "users": {
+    "title": "Kullanıcılar",
+    "subtitle": "Hesap oluştur ve yönet.",
+    "newTitle": "Yeni kullanıcı oluştur",
+    "emailPlaceholder": "E-posta",
+    "usernamePlaceholder": "Kullanıcı adı",
+    "passwordPlaceholder": "Başlangıç parolası (en az 8 karakter)",
+    "adminLabel": "Admin",
+    "create": "Kullanıcı oluştur",
+    "creating": "Oluşturuluyor…",
+    "deactivate": "Devre dışı bırak",
+    "empty": "Henüz kullanıcı yok — ki bu garip çünkü az önce giriş yaptın.",
+    "adminOnly": "Admin yetkisi gerekir."
+  },
   "tokens": {
     "title": "Erişim anahtarları",
     "subtitle": "CI, otomasyon veya kendi istemcilerin için anahtar üret. Bir kere gösterilir — güvenli yere kaydet.",

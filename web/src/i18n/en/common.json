@@ -71,6 +71,20 @@
     "empty": "No audit records yet — try logging in or out.",
     "adminOnly": "Admin role required to view the audit log."
   },
+  "users": {
+    "title": "Users",
+    "subtitle": "Provision and manage accounts.",
+    "newTitle": "Create a new user",
+    "emailPlaceholder": "Email",
+    "usernamePlaceholder": "Username",
+    "passwordPlaceholder": "Initial password (min 8)",
+    "adminLabel": "Admin",
+    "create": "Create user",
+    "creating": "Creating…",
+    "deactivate": "Deactivate",
+    "empty": "No users yet — odd, since you just signed in.",
+    "adminOnly": "Admin role required."
+  },
   "tokens": {
     "title": "Access tokens",
     "subtitle": "Issue tokens for CI, automation, or your own clients. Show once — store securely.",
