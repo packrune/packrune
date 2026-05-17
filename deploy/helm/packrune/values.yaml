@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: AGPL-3.0-only WITH Commons-Clause
+# Copyright (C) 2026 Packrune Contributors
+
+image:
+  repository: ghcr.io/packrune/packrune
+  tag: ""             # defaults to .Chart.appVersion
+  pullPolicy: IfNotPresent
+
+# Number of replicas. Use >1 only with Postgres + shared object storage.
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: packrune.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+persistence:
+  # When backend=fs and no shared filesystem, packrune-data is stored on a
+  # PVC. Switch to S3-style storage to scale horizontally.
+  enabled: true
+  storageClass: ""
+  size: 50Gi
+  accessModes:
+    - ReadWriteOnce
+
+# Choose "sqlite" for single-replica deployments or "postgres" with an
+# externally provisioned database for HA.
+database:
+  driver: sqlite
+  dsn: /data/packrune.db
+  # When driver=postgres, set:
+  #   dsn: postgres://USER:PASS@HOST:5432/packrune?sslmode=disable
+
+storage:
+  backend: fs
+  fs:
+    root: /data/storage
+  s3:
+    endpoint: ""
+    bucket: ""
+    region: ""
+    accessKey: ""
+    secretKey: ""
+    usePath: true
+
+log:
+  level: info
+  format: json
+
+auth:
+  allowSignup: false
+  sessionTTLHours: 24
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+podSecurityContext:
+  fsGroup: 65532
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  readOnlyRootFilesystem: true
+
+# extraEnv lets ops inject any PACKRUNE_* override without templating.
+extraEnv: []
+# - name: PACKRUNE_AUTH_TOKEN_SECRET
+#   valueFrom: { secretKeyRef: { name: packrune-secrets, key: token-secret } }

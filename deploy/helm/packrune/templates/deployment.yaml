@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "packrune.fullname" . }}
+  labels: {{- include "packrune.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{- include "packrune.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "packrune.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: packrune
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["serve"]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          env:
+            - name: PACKRUNE_SERVER_ADDR
+              value: ":8080"
+            - name: PACKRUNE_LOG_LEVEL
+              value: {{ .Values.log.level | quote }}
+            - name: PACKRUNE_LOG_FORMAT
+              value: {{ .Values.log.format | quote }}
+            - name: PACKRUNE_DATABASE_DRIVER
+              value: {{ .Values.database.driver | quote }}
+            - name: PACKRUNE_DATABASE_DSN
+              value: {{ .Values.database.dsn | quote }}
+            - name: PACKRUNE_STORAGE_BACKEND
+              value: {{ .Values.storage.backend | quote }}
+            {{- if eq .Values.storage.backend "fs" }}
+            - name: PACKRUNE_STORAGE_FS_ROOT
+              value: {{ .Values.storage.fs.root | quote }}
+            {{- end }}
+            {{- if eq .Values.storage.backend "s3" }}
+            - name: PACKRUNE_STORAGE_S3_ENDPOINT
+              value: {{ .Values.storage.s3.endpoint | quote }}
+            - name: PACKRUNE_STORAGE_S3_BUCKET
+              value: {{ .Values.storage.s3.bucket | quote }}
+            - name: PACKRUNE_STORAGE_S3_REGION
+              value: {{ .Values.storage.s3.region | quote }}
+            - name: PACKRUNE_STORAGE_S3_ACCESS_KEY
+              value: {{ .Values.storage.s3.accessKey | quote }}
+            - name: PACKRUNE_STORAGE_S3_SECRET_KEY
+              value: {{ .Values.storage.s3.secretKey | quote }}
+            - name: PACKRUNE_STORAGE_S3_USE_PATH
+              value: {{ .Values.storage.s3.usePath | quote }}
+            {{- end }}
+            - name: PACKRUNE_AUTH_ALLOW_SIGNUP
+              value: {{ .Values.auth.allowSignup | quote }}
+            - name: PACKRUNE_AUTH_SESSION_TTL
+              value: {{ .Values.auth.sessionTTLHours | quote }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          {{- end }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "packrune.fullname" . }}-data
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,24 @@
+apiVersion: v2
+name: packrune
+description: |
+  Packrune — the fully free, fully self-hosted, universal artifact repository
+  manager. Speaks Docker/OCI, npm, Helm, Go modules, PyPI, and Maven from a
+  single binary.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - artifact-repository
+  - docker-registry
+  - oci-registry
+  - npm
+  - helm
+  - go-modules
+  - pypi
+  - maven
+home: https://github.com/packrune/packrune
+sources:
+  - https://github.com/packrune/packrune
+icon: https://github.com/packrune/packrune/raw/main/web/public/packrune.svg
+maintainers:
+  - name: Packrune Contributors

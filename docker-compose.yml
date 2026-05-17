@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: AGPL-3.0-only WITH Commons-Clause
+# Copyright (C) 2026 Packrune Contributors
+#
+# Example docker-compose for self-hosting Packrune.
+#
+#   docker compose up --build
+#
+# Defaults to SQLite + local filesystem storage; switch to Postgres + MinIO by
+# uncommenting the services below and pointing PACKRUNE_DATABASE_* /
+# PACKRUNE_STORAGE_* at them.
+
+services:
+  packrune:
+    build: .
+    image: packrune:dev
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - packrune-data:/data
+    environment:
+      PACKRUNE_LOG_LEVEL: info
+      PACKRUNE_LOG_FORMAT: json
+      # Switch to postgres by uncommenting:
+      # PACKRUNE_DATABASE_DRIVER: postgres
+      # PACKRUNE_DATABASE_DSN: postgres://packrune:packrune@postgres:5432/packrune?sslmode=disable
+      # Switch to S3-style storage:
+      # PACKRUNE_STORAGE_BACKEND: s3
+      # PACKRUNE_STORAGE_S3_ENDPOINT: http://minio:9000
+      # PACKRUNE_STORAGE_S3_BUCKET: packrune
+      # PACKRUNE_STORAGE_S3_ACCESS_KEY: devkey
+      # PACKRUNE_STORAGE_S3_SECRET_KEY: devsecret
+      # PACKRUNE_STORAGE_S3_USE_PATH: "true"
+    # depends_on:
+    #   - postgres
+    #   - minio
+
+  # postgres:
+  #   image: postgres:16-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: packrune
+  #     POSTGRES_PASSWORD: packrune
+  #     POSTGRES_DB: packrune
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+
+  # minio:
+  #   image: minio/minio:latest
+  #   restart: unless-stopped
+  #   command: server /data --console-address ":9001"
+  #   ports:
+  #     - "9000:9000"
+  #     - "9001:9001"
+  #   environment:
+  #     MINIO_ROOT_USER: devkey
+  #     MINIO_ROOT_PASSWORD: devsecret
+  #   volumes:
+  #     - minio-data:/data
+
+volumes:
+  packrune-data:
+  # postgres-data:
+  # minio-data:

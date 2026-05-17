@@ -1,0 +1,32 @@
+[Unit]
+Description=Packrune — universal artifact repository manager
+Documentation=https://github.com/packrune/packrune
+After=network.target
+
+[Service]
+Type=simple
+User=packrune
+Group=packrune
+WorkingDirectory=/var/lib/packrune
+ExecStart=/usr/local/bin/packrune serve --config /etc/packrune/packrune.yaml
+Restart=on-failure
+RestartSec=5s
+
+# Security hardening — most options are no-ops if not supported by your kernel.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/packrune
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictRealtime=true
+LockPersonality=true
+
+# Resource caps — adjust to taste.
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

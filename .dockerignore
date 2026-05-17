@@ -1,0 +1,11 @@
+.git
+.github
+bin/
+data/
+storage/
+**/node_modules
+**/dist
+**/.vite
+**/coverage.*
+*.log
+.DS_Store
