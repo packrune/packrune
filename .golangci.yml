@@ -1,7 +1,8 @@
-# Packrune — golangci-lint config.
+# Packrune — golangci-lint config (v2 format).
 #
 # Philosophy: catch real bugs, enforce the house style, don't fight the
 # compiler. Lints that produce more noise than signal are off.
+version: "2"
 
 run:
   timeout: 5m
@@ -9,26 +10,17 @@ run:
   build-tags:
     - integration
 
-output:
-  formats:
-    - format: colored-line-number
-  print-issued-lines: true
-  print-linter-name: true
-
 linters:
-  disable-all: true
+  default: none
   enable:
     - errcheck       # unchecked errors
     - govet          # stdlib vet
     - ineffassign    # ineffective assignments
     - staticcheck    # the big one — many real bugs
     - unused         # dead code
-    - gosimple       # simplifications
     - bodyclose      # http.Response.Body leaks
     - contextcheck   # ctx propagation
     - errorlint      # %w usage, errors.Is/As
-    - gofmt          # formatting
-    - goimports      # import grouping
     - misspell       # typos in comments
     - nakedret       # avoid naked returns in long funcs
     - nilerr         # returning nil after err check
@@ -38,29 +30,38 @@ linters:
     - whitespace     # leading/trailing whitespace
     - copyloopvar    # Go 1.22+ loop var fix
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-  govet:
-    enable-all: true
-  revive:
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    govet:
+      enable-all: true
+    revive:
+      rules:
+        - name: exported
+          arguments:
+            - disableStutteringCheck
+    misspell:
+      locale: US
+
+  exclusions:
     rules:
-      - name: exported
-        arguments:
-          - disableStutteringCheck
-  misspell:
-    locale: US
-  goimports:
-    local-prefixes: github.com/packrune/packrune
+      # Test files: relax a few rules where they add noise without value.
+      - path: _test\.go
+        linters:
+          - errcheck
+          - prealloc
+          - revive
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/packrune/packrune
 
 issues:
-  exclude-rules:
-    # Test files: relax a few rules where they add noise without value.
-    - path: _test\.go
-      linters:
-        - errcheck
-        - prealloc
-        - revive
   max-issues-per-linter: 0
   max-same-issues: 0
