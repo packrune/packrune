@@ -19,7 +19,7 @@ EXPECTED="SPDX-License-Identifier: AGPL-3.0-only WITH Commons-Clause"
 EXTS=(go ts tsx js jsx mjs cjs css scss sh sql)
 
 # Paths we never check (third-party, generated, configuration).
-IGNORE_REGEX='^(LICENSE|NOTICE|COMMONS-CLAUSE|CLA\.md|CODE_OF_CONDUCT\.md|README\.md|CONTRIBUTING\.md|PHASES\.md|\.gitignore|\.editorconfig|go\.mod|go\.sum|Makefile|.*\.md|web/node_modules/.*|web/dist/.*|.*\.lock|.*\.json|.*\.yml|.*\.yaml|.*\.toml|docs/.*)$'
+IGNORE_REGEX='^(LICENSE|NOTICE|COMMONS-CLAUSE|CLA\.md|CODE_OF_CONDUCT\.md|README\.md|CONTRIBUTING\.md|PHASES\.md|\.gitignore|\.editorconfig|go\.mod|go\.sum|Makefile|.*\.md|web/node_modules/.*|web/dist/.*|internal/web/dist/.*|.*\.lock|.*\.json|.*\.yml|.*\.yaml|.*\.toml|docs/.*)$'
 
 missing=()
 
