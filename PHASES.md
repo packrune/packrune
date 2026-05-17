@@ -196,12 +196,14 @@ internationalized page.
       self-deactivation guard)
 - [x] Audit log timeline (admin, color-icon results, 15s auto-refresh)
 - [x] Shell sign-out button + sidebar Link routes + active state
+- [x] Repository detail page (artifact list with substring filter)
+- [x] Global Cmd+K command palette (pages + repos + sign-out)
+- [x] Webhooks management page (admin: list/create/delete)
+- [x] Profile page (visual theme picker, language picker, version footer)
+- [x] System settings page (read-only config view with secret redaction)
 - [ ] Onboarding wizard for the first user (deferred — `packrune users add` covers it)
-- [ ] Repository detail (package browser + tabs)
 - [ ] Package detail (versions, deps, README render, stats)
-- [ ] Global search + Cmd+K command palette
-- [ ] System settings (storage, auth, SMTP, replication)
-- [ ] Profile (theme, language, 2FA)
+- [ ] 2FA on Profile
 - [ ] Accessibility audit (WCAG 2.1 AA target)
 - [ ] Responsive breakpoint pass (≥768px first-class; mobile read-only)
 
